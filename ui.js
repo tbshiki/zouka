@@ -435,12 +435,21 @@ const UI = (function () {
   function updateWarnings(newWidth = 0, newHeight = 0, estimate = null) {
     let hasAnyWarning = false;
 
-    // サイズ増加警告（推定値と元ファイルサイズを比較）
+    // サイズ増加警告
+    // ピクセル数が大幅に増加する場合、またはPNG変換時に警告
     let showSizeWarning = false;
-    if (state.originalInfo && estimate) {
-      // 推定圧縮サイズを数値に変換して比較
-      const estimatedBytes = parseEstimatedSize(estimate.estimatedCompressed);
-      if (estimatedBytes > state.originalInfo.fileSize * 1.1) { // 10%以上増加
+    if (state.originalInfo && newWidth > 0 && newHeight > 0) {
+      const originalPixels = state.originalInfo.width * state.originalInfo.height;
+      const newPixels = newWidth * newHeight;
+      const format = getOutputFormat();
+
+      // ピクセル数が50%以上増加する場合
+      if (newPixels > originalPixels * 1.5) {
+        showSizeWarning = true;
+      }
+      // 元がJPEG/WebPでPNGに変換する場合（容量が大幅に増加する可能性）
+      else if (format === 'image/png' &&
+        (state.originalInfo.mimeType === 'image/jpeg' || state.originalInfo.mimeType === 'image/webp')) {
         showSizeWarning = true;
       }
     }
@@ -465,23 +474,6 @@ const UI = (function () {
 
     // 警告エリア全体の表示/非表示
     elements.warningArea.classList.toggle('hidden', !hasAnyWarning);
-  }
-
-  function parseEstimatedSize(sizeStr) {
-    // "1.5 MB" -> bytes に変換
-    const match = sizeStr.match(/([\d.]+)\s*(B|KB|MB|GB)/i);
-    if (!match) return 0;
-
-    const value = parseFloat(match[1]);
-    const unit = match[2].toUpperCase();
-
-    switch (unit) {
-      case 'B': return value;
-      case 'KB': return value * 1024;
-      case 'MB': return value * 1024 * 1024;
-      case 'GB': return value * 1024 * 1024 * 1024;
-      default: return 0;
-    }
   }
 
   // ========== 変換処理 ==========
@@ -628,9 +620,13 @@ const UI = (function () {
     // UI リセット
     elements.fileInput.value = '';
     elements.originalInfo.classList.add('hidden');
-    elements.settingsSection.classList.add('hidden');
     elements.previewImage.src = '';
     elements.btnConvert.disabled = true;
+
+    // 警告エリアをクリア
+    elements.warningArea.classList.add('hidden');
+    elements.warningSizeIncrease.classList.add('hidden');
+    elements.warningAspectFlip.classList.add('hidden');
 
     // 設定をデフォルトに
     elements.inputWidth.value = '';
