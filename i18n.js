@@ -16,6 +16,10 @@ const I18n = (function () {
       'header.lang.aria': 'Switch language',
       'header.theme.title': 'Toggle dark/light mode',
       'header.theme.aria': 'Toggle between dark and light mode',
+      'intro.description': 'Resize and convert images right in your browser. Choose your settings below, then drop or select an image to convert.',
+      'intro.feature1': '🔒 100% local processing - images never leave your device',
+      'intro.feature2': '🖼️ Support for JPEG, PNG, WebP, GIF, AVIF',
+      'intro.feature3': '📐 Resize by custom size, long edge, or preset ratios',
       'notice.avifUnsupported': 'AVIF format is not supported in this browser.',
       'input.section.aria': 'Image input area',
       'dropzone.aria': 'Click or drop image file here',
@@ -101,6 +105,10 @@ const I18n = (function () {
       'header.lang.aria': '言語を切り替え',
       'header.theme.title': 'テーマ切替',
       'header.theme.aria': 'ダークモードとライトモードを切り替え',
+      'intro.description': 'ブラウザ上で画像をリサイズ・形式変換。下の設定を選んでから、画像をドロップまたは選択してください。',
+      'intro.feature1': '🔒 100%ローカル処理 - 画像はデバイスから出ません',
+      'intro.feature2': '🖼️ JPEG, PNG, WebP, GIF, AVIFに対応',
+      'intro.feature3': '📐 カスタムサイズ、長辺指定、プリセット比率でリサイズ',
       'notice.avifUnsupported': 'このブラウザではAVIF形式に対応していません。',
       'input.section.aria': '画像入力エリア',
       'dropzone.aria': 'クリックまたはドロップで画像を選択',
@@ -212,39 +220,27 @@ const I18n = (function () {
    * @returns {string}
    */
   function t(key, params = {}) {
-    const keys = key.split('.');
-    let value = translations[currentLang];
+    // フラットキー構造を使用（例: 'settings.resize.title'）
+    let value = translations[currentLang]?.[key];
 
-    for (const k of keys) {
-      if (value && typeof value === 'object') {
-        value = value[k];
-      } else {
-        value = undefined;
-        break;
-      }
-    }
-
+    // フォールバック: 英語
     if (value === undefined) {
-      // フォールバック: 英語
-      value = translations.en;
-      for (const k of keys) {
-        if (value && typeof value === 'object') {
-          value = value[k];
-        } else {
-          value = key; // キーをそのまま返す
-          break;
-        }
-      }
+      value = translations.en?.[key];
     }
 
-    if (typeof value === 'string') {
-      // パラメータ置換
+    // それでも見つからない場合はキーをそのまま返す
+    if (value === undefined) {
+      return key;
+    }
+
+    // パラメータ置換
+    if (typeof value === 'string' && Object.keys(params).length > 0) {
       Object.entries(params).forEach(([k, v]) => {
         value = value.replace(new RegExp(`{{${k}}}`, 'g'), v);
       });
     }
 
-    return value || key;
+    return value;
   }
 
   /**
