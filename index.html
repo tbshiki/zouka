@@ -80,10 +80,10 @@
             <p class="tagline" data-i18n="header.tagline">Image Resize & Convert Tool</p>
         </div>
         <div class="header-actions">
-            <button id="btn-lang-toggle" class="btn-lang-toggle" title="言語切替" aria-label="Switch language" data-i18n="header.lang.title" data-i18n-attr="title" data-i18n-aria="header.lang.aria">
+            <button type="button" id="btn-lang-toggle" class="btn-lang-toggle" title="Switch language" aria-label="Switch language" data-i18n="header.lang.title" data-i18n-attr="title" data-i18n-aria="header.lang.aria">
                 <span class="lang-icon" aria-hidden="true">JA</span>
             </button>
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="テーマ切替" aria-label="Toggle between dark and light mode" data-i18n="header.theme.title" data-i18n-attr="title" data-i18n-aria="header.theme.aria">
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle dark/light mode" aria-label="Toggle between dark and light mode" data-i18n="header.theme.title" data-i18n-attr="title" data-i18n-aria="header.theme.aria">
                 <span class="theme-icon" aria-hidden="true">☀️</span>
             </button>
         </div>
@@ -172,7 +172,7 @@
                                 <span class="unit">px</span>
                             </div>
                         </div>
-                        <button id="btn-lock-ratio" class="btn-lock active" title="Lock aspect ratio" aria-pressed="true" data-i18n="settings.resize.lockRatio" data-i18n-attr="title">
+                        <button type="button" id="btn-lock-ratio" class="btn-lock active" title="Lock aspect ratio" aria-pressed="true" data-i18n="settings.resize.lockRatio" data-i18n-attr="title">
                             <span class="lock-icon" aria-hidden="true">🔗</span>
                         </button>
                         <div class="input-group">
@@ -198,11 +198,11 @@
                     <!-- Preset Ratio Selector -->
                     <div id="preset-ratio-inputs" class="size-inputs hidden">
                         <div class="preset-buttons">
-                            <button class="btn-preset" data-ratio="1:1">1:1</button>
-                            <button class="btn-preset" data-ratio="4:3">4:3</button>
-                            <button class="btn-preset" data-ratio="3:4">3:4</button>
-                            <button class="btn-preset" data-ratio="16:9">16:9</button>
-                            <button class="btn-preset" data-ratio="9:16">9:16</button>
+                            <button type="button" class="btn-preset" data-ratio="1:1">1:1</button>
+                            <button type="button" class="btn-preset" data-ratio="4:3">4:3</button>
+                            <button type="button" class="btn-preset" data-ratio="3:4">3:4</button>
+                            <button type="button" class="btn-preset" data-ratio="16:9">16:9</button>
+                            <button type="button" class="btn-preset" data-ratio="9:16">9:16</button>
                         </div>
                         <div class="input-group full-width">
                             <label for="input-preset-width" data-i18n="settings.resize.baseWidth">Base Width</label>
@@ -283,11 +283,11 @@
 
             <!-- Action Buttons -->
             <div class="action-bar">
-                <button id="btn-convert" class="btn-primary" disabled>
+                <button type="button" id="btn-convert" class="btn-primary" disabled>
                     <span class="btn-icon" aria-hidden="true">🔄</span>
                     <span data-i18n="action.convert">Convert</span>
                 </button>
-                <button id="btn-reset" class="btn-secondary">
+                <button type="button" id="btn-reset" class="btn-secondary">
                     <span data-i18n="action.reset">Reset</span>
                 </button>
             </div>
@@ -359,7 +359,7 @@
                         from taptoclicks.com
                     </a>
                 </div>
-                <button id="btn-privacy-toggle" class="btn-privacy-toggle active" aria-expanded="true"
+                <button type="button" id="btn-privacy-toggle" class="btn-privacy-toggle active" aria-expanded="true"
                     aria-controls="privacy-details">
                     🔒 <span data-i18n="footer.privacy.toggle">Privacy</span>
                     <span class="toggle-icon" aria-hidden="true">▼</span>

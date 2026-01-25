@@ -227,6 +227,15 @@ const UI = (function () {
     }
 
     try {
+      // 古いリソースを解放
+      if (state.originalBitmap) {
+        state.originalBitmap.close();
+      }
+      if (state.previewUrl && state.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(state.previewUrl);
+        state.previewUrl = null;
+      }
+
       // 画像ロード
       const { bitmap, info } = await ImageProcessor.loadImage(file);
 
@@ -250,7 +259,7 @@ const UI = (function () {
 
     } catch (error) {
       console.error('Error loading image:', error);
-      showToast('Failed to load image', 'error');
+      showToast(I18n.t('toast.fileError'), 'error');
     }
   }
 
@@ -478,7 +487,7 @@ const UI = (function () {
     elements.resultConvertedSize.textContent = `${result.width}×${result.height} / ${result.formattedSize}`;
 
     // サイズ削減率
-    const reduction = ((state.originalInfo.fileSize - result.size) / state.originalInfo.fileSize * 100).toFixed(1);
+    const reduction = parseFloat(((state.originalInfo.fileSize - result.size) / state.originalInfo.fileSize * 100).toFixed(1));
     if (reduction > 0) {
       elements.resultReduction.textContent = `-${reduction}%`;
       elements.resultReduction.classList.remove('increase');
@@ -639,6 +648,7 @@ const UI = (function () {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
+    toast.style.opacity = '1';
     toast.style.transition = 'opacity 0.3s ease';
     elements.toastContainer.appendChild(toast);
 
