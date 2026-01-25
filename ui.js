@@ -14,6 +14,7 @@ const UI = (function () {
     originalImage: null,
     originalBitmap: null,
     originalInfo: null,
+    previewUrl: null,
     convertedUrl: null,
     lockRatio: true,
     selectedRatio: '1:1',
@@ -190,6 +191,10 @@ const UI = (function () {
   function handleDragLeave(e) {
     e.preventDefault();
     e.stopPropagation();
+    // 子要素への移動時は無視（relatedTargetがdropZone内の場合）
+    if (elements.dropZone.contains(e.relatedTarget)) {
+      return;
+    }
     elements.dropZone.classList.remove('dragover');
   }
 
@@ -217,7 +222,7 @@ const UI = (function () {
     // バリデーション
     const validation = ImageProcessor.validateFile(file);
     if (!validation.valid) {
-      showToast(validation.error, 'error');
+      showToast(I18n.t(validation.errorKey), 'error');
       return;
     }
 
@@ -259,11 +264,13 @@ const UI = (function () {
   }
 
   function displayPreview(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      elements.previewImage.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    // 既存のObject URLがあれば解放
+    if (state.previewUrl && state.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(state.previewUrl);
+    }
+    // Object URLを使用（FileReaderより効率的）
+    state.previewUrl = URL.createObjectURL(file);
+    elements.previewImage.src = state.previewUrl;
   }
 
   function showSettings() {
@@ -522,9 +529,13 @@ const UI = (function () {
     if (state.originalBitmap) {
       state.originalBitmap.close();
     }
+    if (state.previewUrl && state.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(state.previewUrl);
+    }
     state.originalImage = null;
     state.originalBitmap = null;
     state.originalInfo = null;
+    state.previewUrl = null;
     hideResult();
 
     // UI リセット
@@ -628,6 +639,7 @@ const UI = (function () {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
+    toast.style.transition = 'opacity 0.3s ease';
     elements.toastContainer.appendChild(toast);
 
     setTimeout(() => {

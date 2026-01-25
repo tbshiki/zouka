@@ -69,19 +69,19 @@ const ImageProcessor = (function () {
   /**
    * ファイル検証
    * @param {File} file
-   * @returns {{valid: boolean, error?: string}}
+   * @returns {{valid: boolean, errorKey?: string}}
    */
   function validateFile(file) {
     if (!file) {
-      return { valid: false, error: 'No file selected' };
+      return { valid: false, errorKey: 'toast.noFile' };
     }
 
     if (file.size > CONFIG.MAX_FILE_SIZE) {
-      return { valid: false, error: `File size exceeds ${formatFileSize(CONFIG.MAX_FILE_SIZE)}` };
+      return { valid: false, errorKey: 'toast.fileTooLarge' };
     }
 
     if (!CONFIG.SUPPORTED_FORMATS.includes(file.type) && !file.type.startsWith('image/')) {
-      return { valid: false, error: 'Unsupported file format' };
+      return { valid: false, errorKey: 'toast.unsupportedFormat' };
     }
 
     return { valid: true };
