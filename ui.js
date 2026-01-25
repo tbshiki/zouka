@@ -254,6 +254,7 @@ const UI = (function () {
       displayPreview(file);
       showSettings();
       updateSizeInputs(info.width, info.height);
+      updateFormatControls();
       updateEstimate();
 
       // 変換ボタン有効化
@@ -358,10 +359,34 @@ const UI = (function () {
     // PNG選択時は品質コントロールを非表示
     elements.qualityControl.classList.toggle('hidden', format === 'image/png');
 
-    // JPEG選択時は背景色コントロールを表示
-    elements.bgColorControl.classList.toggle('hidden', format !== 'image/jpeg');
+    // JPEG選択時かつ元画像が透過可能フォーマットの場合のみ背景色コントロールを表示
+    const showBgColor = format === 'image/jpeg' && isOriginalTransparentCapable();
+    elements.bgColorControl.classList.toggle('hidden', !showBgColor);
 
     updateEstimate();
+  }
+
+  /**
+   * 元画像が透過をサポートするフォーマットかどうか
+   * @returns {boolean}
+   */
+  function isOriginalTransparentCapable() {
+    if (!state.originalInfo) return false;
+
+    // JPEGは透過をサポートしない
+    const transparentFormats = ['image/png', 'image/webp', 'image/gif', 'image/avif'];
+    return transparentFormats.includes(state.originalInfo.mimeType);
+  }
+
+  /**
+   * フォーマット関連のコントロールを更新
+   */
+  function updateFormatControls() {
+    const format = getOutputFormat();
+
+    // JPEG選択時かつ元画像が透過可能フォーマットの場合のみ背景色コントロールを表示
+    const showBgColor = format === 'image/jpeg' && isOriginalTransparentCapable();
+    elements.bgColorControl.classList.toggle('hidden', !showBgColor);
   }
 
   function handleQualityChange() {
@@ -492,7 +517,8 @@ const UI = (function () {
         mode,
         format,
         quality: parseInt(elements.inputQuality.value) / 100,
-        bgColor: elements.inputBgColor.value
+        bgColor: elements.inputBgColor.value,
+        originalFileSize: state.originalInfo.fileSize // 元ファイルサイズを渡す
       };
 
       switch (mode) {
@@ -523,10 +549,15 @@ const UI = (function () {
       // 結果表示
       displayResult(result, format);
 
-      // 容量増加時は警告トースト
+      // トースト通知
       if (result.size > state.originalInfo.fileSize) {
+        // それでもサイズが増加した場合（PNG変換時など）
         const increase = Math.round((result.size / state.originalInfo.fileSize - 1) * 100);
         showToast(I18n.t('toast.sizeIncreased', { percent: increase }) || `File size increased by ${increase}%`, 'warning');
+      } else if (result.qualityReduced) {
+        // 品質を自動調整してサイズを抑えた場合
+        const qualityPercent = Math.round(result.finalQuality * 100);
+        showToast(I18n.t('toast.qualityAdjusted', { quality: qualityPercent }) || `Quality auto-adjusted to ${qualityPercent}% for smaller file`, 'success');
       } else {
         showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
       }

@@ -715,6 +715,13 @@ body {
     font-weight: 500;
 }
 
+.estimate-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: var(--space-sm);
+    font-style: italic;
+}
+
 /* Warning Area */
 .warning-area {
     display: flex;

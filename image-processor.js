@@ -181,7 +181,7 @@ const ImageProcessor = (function () {
     // 非圧縮: RGBA = 4 bytes/pixel
     const rawSize = totalPixels * 4;
 
-    // 圧縮後サイズの推定（非常に概算）
+    // 圧縮後サイズの推定（非常に概算、実際の結果は大きく異なる場合があります）
     let compressionRatio;
     switch (format) {
       case 'image/jpeg':
@@ -194,7 +194,9 @@ const ImageProcessor = (function () {
         compressionRatio = 0.08 + (1 - quality) * 0.12; // 8-20%
         break;
       case 'image/avif':
-        compressionRatio = 0.05 + (1 - quality) * 0.1; // 5-15%
+        // AVIFはブラウザ実装により結果が大きく異なる
+        // 保守的な推定値を使用
+        compressionRatio = 0.15 + (1 - quality) * 0.2; // 15-35%
         break;
       default:
         compressionRatio = 0.2;
@@ -251,20 +253,80 @@ const ImageProcessor = (function () {
     // UI更新のための待機
     await new Promise(resolve => requestAnimationFrame(resolve));
 
-    // Blob生成
+    // Blob生成（サイズ最適化付き）
+    const result = await generateOptimizedBlob(canvas, options, width, height);
+
+    return result;
+  }
+
+  /**
+   * 最適化されたBlobを生成
+   * 元のファイルサイズより大きくならないよう品質を自動調整
+   * @param {HTMLCanvasElement} canvas
+   * @param {Object} options
+   * @param {number} width
+   * @param {number} height
+   * @returns {Promise<Object>}
+   */
+  async function generateOptimizedBlob(canvas, options, width, height) {
+    const originalFileSize = options.originalFileSize || Infinity;
+    const targetFormat = options.format;
+
+    // PNG は品質調整不可（可逆圧縮）
+    if (targetFormat === 'image/png') {
+      return generateBlob(canvas, targetFormat, undefined, width, height);
+    }
+
+    // 初期品質を設定
+    let quality = options.quality;
+
+    // AVIF は特に低めの品質からスタート
+    if (targetFormat === 'image/avif') {
+      quality = Math.min(quality, 0.6);
+    }
+
+    // 最大5回まで品質を下げて試行
+    const minQuality = 0.3;
+    const qualityStep = 0.1;
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    while (attempts < maxAttempts) {
+      const result = await generateBlob(canvas, targetFormat, quality, width, height);
+
+      // サイズが元ファイル以下、または最低品質に達した場合は終了
+      if (result.size <= originalFileSize || quality <= minQuality) {
+        result.finalQuality = quality;
+        result.qualityReduced = quality < options.quality;
+        return result;
+      }
+
+      // 品質を下げて再試行
+      quality = Math.max(minQuality, quality - qualityStep);
+      attempts++;
+
+      // 前回の結果のURLを解放
+      URL.revokeObjectURL(result.url);
+    }
+
+    // 最終的に最低品質で生成
+    const finalResult = await generateBlob(canvas, targetFormat, minQuality, width, height);
+    finalResult.finalQuality = minQuality;
+    finalResult.qualityReduced = true;
+    return finalResult;
+  }
+
+  /**
+   * Blobを生成
+   * @param {HTMLCanvasElement} canvas
+   * @param {string} format
+   * @param {number|undefined} quality
+   * @param {number} width
+   * @param {number} height
+   * @returns {Promise<Object>}
+   */
+  function generateBlob(canvas, format, quality, width, height) {
     return new Promise((resolve, reject) => {
-      let quality = options.quality;
-
-      // PNG は品質パラメータ不要
-      if (options.format === 'image/png') {
-        quality = undefined;
-      }
-      // AVIF は品質値を調整（ブラウザのエンコーダーは高めに解釈する傾向）
-      // 同等の視覚的品質を得るため、やや低めの値を使用
-      else if (options.format === 'image/avif') {
-        quality = Math.max(0.1, options.quality * 0.7);
-      }
-
       canvas.toBlob(blob => {
         if (!blob) {
           reject(new Error('Failed to convert image'));
@@ -280,7 +342,7 @@ const ImageProcessor = (function () {
           width,
           height
         });
-      }, options.format, quality);
+      }, format, quality);
     });
   }
 
