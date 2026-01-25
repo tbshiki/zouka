@@ -400,7 +400,7 @@
                 <ul>
                     <li>✅ <span data-i18n="footer.privacy.local">This tool processes everything locally</span></li>
                     <li>✅ <span data-i18n="footer.privacy.noSend">Images are not sent to any server</span></li>
-                    <li>✅ <span data-i18n="footer.privacy.noFetch">No fetch/XMLHttpRequest used - technically impossible to send data</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.noFetch">Translations are loaded locally; external data transmission is blocked by CSP</span></li>
                 </ul>
             </div>
         </div>
@@ -435,13 +435,13 @@
                         <li>✅ <span data-i18n="privacy.section2.item1">Images are not sent to any server</span></li>
                         <li>✅ <span data-i18n="privacy.section2.item2">Images are not saved or recorded anywhere</span></li>
                         <li>✅ <span data-i18n="privacy.section2.item3">Image data is deleted when you close the page</span></li>
-                        <li>✅ <span data-i18n="privacy.section2.item4">No fetch/XMLHttpRequest - technically impossible to transmit</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item4">Translation files are loaded locally only (no external transmission)</span></li>
                     </ul>
                 </section>
 
                 <section class="policy-section">
                     <h3 data-i18n="privacy.section3.title">3. Technical Guarantee</h3>
-                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to technically prevent any network requests for user data. The connect-src directive is set to 'none', making it impossible to send data to external servers.</p>
+                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to prevent external network requests for user data. The connect-src directive allows only 'self' to load local translation files.</p>
                 </section>
 
                 <section class="policy-section">
@@ -456,7 +456,7 @@
                 <section class="policy-section">
                     <h3 data-i18n="privacy.section5.title">5. Contact</h3>
                     <p>
-                        <span data-i18n="privacy.section5.content.prefix"></span><a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer" data-i18n="privacy.section5.content.link"></a><span data-i18n="privacy.section5.content.suffix"></span>
+                        <span data-i18n="privacy.section5.content.prefix">For inquiries about this privacy policy, please use the </span><a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer" data-i18n="privacy.section5.content.link">GitHub Issues</a><span data-i18n="privacy.section5.content.suffix">.</span>
                     </p>
                 </section>
 

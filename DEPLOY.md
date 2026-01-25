@@ -73,7 +73,7 @@ curl -I https://zouka.taptoclicks.com/
 ```
 
 以下のヘッダーが返されることを確認：
-- `Content-Security-Policy` に `connect-src 'none'` が含まれる
+- `Content-Security-Policy` に `connect-src 'self'` が含まれる（翻訳JSONのローカル読み込みのため）
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 

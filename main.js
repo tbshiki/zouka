@@ -12,7 +12,7 @@
   async function initApp() {
     console.log('🖼️ zouka v0.1.0 - Image Resize & Convert Tool');
     console.log('🔒 完全ローカル処理 - サーバー通信なし');
-    console.log('🚫 fetch/XMLHttpRequest 不使用 - 技術的に送信不能');
+    console.log('🚫 翻訳ファイルはローカル読み込み - 外部通信はCSPで禁止');
 
     // ImageProcessor 確認
     if (typeof ImageProcessor !== 'undefined') {
