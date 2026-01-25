@@ -577,6 +577,7 @@ const UI = (function () {
     // アスペクト比ロックリセット
     state.lockRatio = true;
     elements.btnLockRatio.classList.add('active');
+    elements.btnLockRatio.setAttribute('aria-pressed', 'true');
     elements.btnLockRatio.querySelector('.lock-icon').textContent = '🔗';
   }
 

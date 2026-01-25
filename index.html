@@ -168,7 +168,7 @@
                         <div class="input-group">
                             <label for="input-width" data-i18n="settings.resize.width">Width</label>
                             <div class="input-with-unit">
-                                <input type="number" id="input-width" min="1" max="8000" placeholder="800">
+                                <input type="number" id="input-width" min="1" max="8000" step="1" inputmode="numeric" placeholder="800">
                                 <span class="unit">px</span>
                             </div>
                         </div>
@@ -178,7 +178,7 @@
                         <div class="input-group">
                             <label for="input-height" data-i18n="settings.resize.height">Height</label>
                             <div class="input-with-unit">
-                                <input type="number" id="input-height" min="1" max="8000" placeholder="600">
+                                <input type="number" id="input-height" min="1" max="8000" step="1" inputmode="numeric" placeholder="600">
                                 <span class="unit">px</span>
                             </div>
                         </div>
@@ -189,7 +189,7 @@
                         <div class="input-group full-width">
                             <label for="input-long-edge" data-i18n="settings.resize.longEdgeLabel">Long Edge</label>
                             <div class="input-with-unit">
-                                <input type="number" id="input-long-edge" min="1" max="8000" placeholder="1920">
+                                <input type="number" id="input-long-edge" min="1" max="8000" step="1" inputmode="numeric" placeholder="1920">
                                 <span class="unit">px</span>
                             </div>
                         </div>
@@ -207,7 +207,7 @@
                         <div class="input-group full-width">
                             <label for="input-preset-width" data-i18n="settings.resize.baseWidth">Base Width</label>
                             <div class="input-with-unit">
-                                <input type="number" id="input-preset-width" min="1" max="8000" placeholder="1080">
+                                <input type="number" id="input-preset-width" min="1" max="8000" step="1" inputmode="numeric" placeholder="1080">
                                 <span class="unit">px</span>
                             </div>
                         </div>
@@ -302,7 +302,7 @@
                 <div class="result-card">
                     <h3 class="card-title" data-i18n="result.original">Original</h3>
                     <div class="result-preview">
-                        <img id="result-original-img" class="result-image" alt="Original image">
+                        <img id="result-original-img" class="result-image" alt="Original image" data-i18n="result.original" data-i18n-attr="alt">
                     </div>
                     <div class="result-info">
                         <span id="result-original-size" class="result-size">-</span>
@@ -313,7 +313,7 @@
                 <div class="result-card">
                     <h3 class="card-title" data-i18n="result.converted">Converted</h3>
                     <div class="result-preview">
-                        <img id="result-converted-img" class="result-image" alt="Converted image">
+                        <img id="result-converted-img" class="result-image" alt="Converted image" data-i18n="result.converted" data-i18n-attr="alt">
                     </div>
                     <div class="result-info">
                         <span id="result-converted-size" class="result-size">-</span>
