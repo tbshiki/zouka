@@ -253,7 +253,17 @@ const ImageProcessor = (function () {
 
     // Blob生成
     return new Promise((resolve, reject) => {
-      const quality = options.format === 'image/png' ? undefined : options.quality;
+      let quality = options.quality;
+
+      // PNG は品質パラメータ不要
+      if (options.format === 'image/png') {
+        quality = undefined;
+      }
+      // AVIF は品質値を調整（ブラウザのエンコーダーは高めに解釈する傾向）
+      // 同等の視覚的品質を得るため、やや低めの値を使用
+      else if (options.format === 'image/avif') {
+        quality = Math.max(0.1, options.quality * 0.7);
+      }
 
       canvas.toBlob(blob => {
         if (!blob) {

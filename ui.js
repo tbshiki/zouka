@@ -101,6 +101,11 @@ const UI = (function () {
       btnModalClose: document.getElementById('btn-modal-close'),
       modalBackdrop: document.querySelector('.modal-backdrop'),
 
+      // Warnings
+      warningArea: document.getElementById('warning-area'),
+      warningSizeIncrease: document.getElementById('warning-size-increase'),
+      warningAspectFlip: document.getElementById('warning-aspect-flip'),
+
       // Toast
       toastContainer: document.getElementById('toast-container')
     };
@@ -381,7 +386,10 @@ const UI = (function () {
   }
 
   function updateEstimate() {
-    if (!state.originalInfo) return;
+    if (!state.originalInfo) {
+      updateWarnings();
+      return;
+    }
 
     const mode = getResizeMode();
     const format = getOutputFormat();
@@ -417,6 +425,63 @@ const UI = (function () {
     elements.estimatePixels.textContent = estimate.totalPixels;
     elements.estimateRaw.textContent = estimate.rawSize;
     elements.estimateCompressed.textContent = `~${estimate.estimatedCompressed}`;
+
+    // 警告を更新
+    updateWarnings(width, height, estimate);
+  }
+
+  // ========== 警告表示 ==========
+
+  function updateWarnings(newWidth = 0, newHeight = 0, estimate = null) {
+    let hasAnyWarning = false;
+
+    // サイズ増加警告（推定値と元ファイルサイズを比較）
+    let showSizeWarning = false;
+    if (state.originalInfo && estimate) {
+      // 推定圧縮サイズを数値に変換して比較
+      const estimatedBytes = parseEstimatedSize(estimate.estimatedCompressed);
+      if (estimatedBytes > state.originalInfo.fileSize * 1.1) { // 10%以上増加
+        showSizeWarning = true;
+      }
+    }
+    elements.warningSizeIncrease.classList.toggle('hidden', !showSizeWarning);
+    if (showSizeWarning) hasAnyWarning = true;
+
+    // 縦横比逆転警告
+    let showAspectFlipWarning = false;
+    if (state.originalInfo && newWidth > 0 && newHeight > 0) {
+      const originalIsLandscape = state.originalInfo.width > state.originalInfo.height;
+      const originalIsPortrait = state.originalInfo.width < state.originalInfo.height;
+      const newIsLandscape = newWidth > newHeight;
+      const newIsPortrait = newWidth < newHeight;
+
+      // 横長→縦長、または縦長→横長になる場合
+      if ((originalIsLandscape && newIsPortrait) || (originalIsPortrait && newIsLandscape)) {
+        showAspectFlipWarning = true;
+      }
+    }
+    elements.warningAspectFlip.classList.toggle('hidden', !showAspectFlipWarning);
+    if (showAspectFlipWarning) hasAnyWarning = true;
+
+    // 警告エリア全体の表示/非表示
+    elements.warningArea.classList.toggle('hidden', !hasAnyWarning);
+  }
+
+  function parseEstimatedSize(sizeStr) {
+    // "1.5 MB" -> bytes に変換
+    const match = sizeStr.match(/([\d.]+)\s*(B|KB|MB|GB)/i);
+    if (!match) return 0;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2].toUpperCase();
+
+    switch (unit) {
+      case 'B': return value;
+      case 'KB': return value * 1024;
+      case 'MB': return value * 1024 * 1024;
+      case 'GB': return value * 1024 * 1024 * 1024;
+      default: return 0;
+    }
   }
 
   // ========== 変換処理 ==========
@@ -466,7 +531,13 @@ const UI = (function () {
       // 結果表示
       displayResult(result, format);
 
-      showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
+      // 容量増加時は警告トースト
+      if (result.size > state.originalInfo.fileSize) {
+        const increase = Math.round((result.size / state.originalInfo.fileSize - 1) * 100);
+        showToast(I18n.t('toast.sizeIncreased', { percent: increase }) || `File size increased by ${increase}%`, 'warning');
+      } else {
+        showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
+      }
 
     } catch (error) {
       console.error('Conversion error:', error);
@@ -491,9 +562,16 @@ const UI = (function () {
     if (reduction > 0) {
       elements.resultReduction.textContent = `-${reduction}%`;
       elements.resultReduction.classList.remove('increase');
+      elements.resultReduction.classList.remove('warning');
     } else {
       elements.resultReduction.textContent = `+${Math.abs(reduction)}%`;
       elements.resultReduction.classList.add('increase');
+      // 20%以上増加した場合は警告色
+      if (Math.abs(reduction) >= 20) {
+        elements.resultReduction.classList.add('warning');
+      } else {
+        elements.resultReduction.classList.remove('warning');
+      }
     }
 
     // ダウンロードリンク
