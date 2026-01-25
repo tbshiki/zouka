@@ -1,7 +1,7 @@
 /**
  * zouka - Internationalization Module
  * 多言語対応
- * Note: ローカルJSONの翻訳データを読み込み（CSP connect-src 'self' 対応）
+ * Note: ローカルJSONの翻訳データを読み込み（CSPの許可リストに準拠）
  */
 
 const I18n = (function () {

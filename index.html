@@ -398,9 +398,9 @@
             </div>
             <div id="privacy-details" class="privacy-details">
                 <ul>
-                    <li>✅ <span data-i18n="footer.privacy.local">This tool processes everything locally</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.local">Images are processed locally</span></li>
                     <li>✅ <span data-i18n="footer.privacy.noSend">Images are not sent to any server</span></li>
-                    <li>✅ <span data-i18n="footer.privacy.noFetch">Translations are loaded locally; external data transmission is blocked by CSP</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.noFetch">Analytics via Zaraz/Clarity may send usage data (no image data)</span></li>
                 </ul>
             </div>
         </div>
@@ -435,21 +435,23 @@
                         <li>✅ <span data-i18n="privacy.section2.item1">Images are not sent to any server</span></li>
                         <li>✅ <span data-i18n="privacy.section2.item2">Images are not saved or recorded anywhere</span></li>
                         <li>✅ <span data-i18n="privacy.section2.item3">Image data is deleted when you close the page</span></li>
-                        <li>✅ <span data-i18n="privacy.section2.item4">Translation files are loaded locally only (no external transmission)</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item4">Translation files are loaded locally</span></li>
                     </ul>
                 </section>
 
                 <section class="policy-section">
                     <h3 data-i18n="privacy.section3.title">3. Technical Guarantee</h3>
-                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to prevent external network requests for user data. The connect-src directive allows only 'self' to load local translation files.</p>
+                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to limit network requests to approved endpoints for analytics and local translation files.</p>
                 </section>
 
                 <section class="policy-section">
-                    <h3 data-i18n="privacy.section4.title">4. Local Storage</h3>
-                    <p data-i18n="privacy.section4.intro">This tool uses local storage only for the following purposes.</p>
+                    <h3 data-i18n="privacy.section4.title">4. Analytics and Local Storage</h3>
+                    <p data-i18n="privacy.section4.intro">This tool uses analytics and local storage only for the following purposes.</p>
                     <ul>
-                        <li data-i18n="privacy.section4.item1">Saving theme settings (dark/light mode)</li>
-                        <li data-i18n="privacy.section4.item2">Saving language settings</li>
+                        <li data-i18n="privacy.section4.item1">Analytics via Cloudflare Zaraz and Microsoft Clarity to improve usability</li>
+                        <li data-i18n="privacy.section4.item2">Analytics data may include page views, device information, and interactions (no image contents)</li>
+                        <li data-i18n="privacy.section4.item3">Saving theme settings (dark/light mode)</li>
+                        <li data-i18n="privacy.section4.item4">Saving language settings</li>
                     </ul>
                 </section>
 
