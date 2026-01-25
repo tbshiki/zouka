@@ -98,7 +98,9 @@ const I18n = (function () {
       'privacy.section4.item1': 'Saving theme settings (dark/light mode)',
       'privacy.section4.item2': 'Saving language settings',
       'privacy.section5.title': '5. Contact',
-      'privacy.section5.content': 'For inquiries about this privacy policy, please use the <a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.',
+      'privacy.section5.content.prefix': 'For inquiries about this privacy policy, please use the ',
+      'privacy.section5.content.link': 'GitHub Issues',
+      'privacy.section5.content.suffix': '.',
       'privacy.section6.title': '6. Amendments',
       'privacy.section6.content': 'This privacy policy may be amended as necessary. Significant changes will be announced on this tool.',
       'privacy.lastUpdated': 'Last updated: January 25, 2026'
@@ -192,7 +194,9 @@ const I18n = (function () {
       'privacy.section4.item1': 'テーマ設定の保存（ダーク/ライトモード）',
       'privacy.section4.item2': '言語設定の保存',
       'privacy.section5.title': '5. お問い合わせ',
-      'privacy.section5.content': 'このプライバシーポリシーに関するお問い合わせは、<a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>をご利用ください。',
+      'privacy.section5.content.prefix': 'このプライバシーポリシーに関するお問い合わせは、',
+      'privacy.section5.content.link': 'GitHub Issues',
+      'privacy.section5.content.suffix': 'をご利用ください。',
       'privacy.section6.title': '6. 改定',
       'privacy.section6.content': 'このプライバシーポリシーは必要に応じて改定されることがあります。重要な変更は本ツール上でお知らせします。',
       'privacy.lastUpdated': '最終更新日: 2026年1月25日'

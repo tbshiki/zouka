@@ -10,7 +10,7 @@ const ImageProcessor = (function () {
   const CONFIG = {
     MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB
     MAX_DIMENSION: 8000, // 8000px
-    SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
+    SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/jpg'],
     OUTPUT_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
   };
 
@@ -67,6 +67,49 @@ const ImageProcessor = (function () {
   }
 
   /**
+   * MIMEタイプを正規化
+   * @param {string} type
+   * @returns {string}
+   */
+  function normalizeMimeType(type) {
+    return typeof type === 'string' ? type.toLowerCase().trim() : '';
+  }
+
+  /**
+   * 拡張子からMIMEタイプを推定
+   * @param {string} filename
+   * @returns {string}
+   */
+  function inferMimeTypeFromFilename(filename) {
+    if (!filename) return '';
+    const match = filename.toLowerCase().match(/\.([^.]+)$/);
+    if (!match) return '';
+    const ext = match[1];
+    const map = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+      gif: 'image/gif',
+      avif: 'image/avif'
+    };
+    return map[ext] || '';
+  }
+
+  /**
+   * ファイルのMIMEタイプを解決
+   * @param {File} file
+   * @returns {string}
+   */
+  function resolveMimeType(file) {
+    const normalized = normalizeMimeType(file?.type);
+    if (normalized && normalized !== 'application/octet-stream') {
+      return normalized;
+    }
+    return inferMimeTypeFromFilename(file?.name);
+  }
+
+  /**
    * ファイル検証
    * @param {File} file
    * @returns {{valid: boolean, errorKey?: string}}
@@ -80,7 +123,8 @@ const ImageProcessor = (function () {
       return { valid: false, errorKey: 'toast.fileTooLarge' };
     }
 
-    if (!CONFIG.SUPPORTED_FORMATS.includes(file.type) && !file.type.startsWith('image/')) {
+    const resolvedType = resolveMimeType(file);
+    if (!CONFIG.SUPPORTED_FORMATS.includes(resolvedType)) {
       return { valid: false, errorKey: 'toast.unsupportedFormat' };
     }
 
@@ -96,7 +140,14 @@ const ImageProcessor = (function () {
     // UI更新のための待機
     await new Promise(resolve => requestAnimationFrame(resolve));
 
-    const bitmap = await createImageBitmap(file);
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch (error) {
+      // imageOrientation未対応ブラウザ向けのフォールバック
+      bitmap = await createImageBitmap(file);
+    }
+    const mimeType = resolveMimeType(file);
 
     const info = {
       filename: file.name,
@@ -105,7 +156,7 @@ const ImageProcessor = (function () {
       aspectRatio: calculateAspectRatio(bitmap.width, bitmap.height),
       fileSize: file.size,
       formattedSize: formatFileSize(file.size),
-      mimeType: file.type
+      mimeType: mimeType || file.type
     };
 
     return { bitmap, info };

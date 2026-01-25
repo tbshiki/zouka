@@ -117,7 +117,7 @@
                     <p class="drop-zone-text" data-i18n="dropzone.text">Drop image here or click to select</p>
                     <p class="drop-zone-hint" data-i18n="dropzone.hint">Supports: JPEG, PNG, WebP, GIF, AVIF (max 20MB)</p>
                 </div>
-                <input type="file" id="file-input" accept="image/*" class="file-input" aria-hidden="true">
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,.jpg,.jpeg,.png,.webp,.gif,.avif" class="file-input" aria-hidden="true">
             </div>
 
             <!-- Original Image Info -->
@@ -455,8 +455,8 @@
 
                 <section class="policy-section">
                     <h3 data-i18n="privacy.section5.title">5. Contact</h3>
-                    <p data-i18n="privacy.section5.content" data-i18n-html="true">
-                        For inquiries about this privacy policy, please use the <a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
+                    <p>
+                        <span data-i18n="privacy.section5.content.prefix"></span><a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer" data-i18n="privacy.section5.content.link"></a><span data-i18n="privacy.section5.content.suffix"></span>
                     </p>
                 </section>
 
@@ -469,7 +469,7 @@
         </div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" role="region" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Scripts -->
     <script src="i18n.js"></script>

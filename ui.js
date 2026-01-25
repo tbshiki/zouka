@@ -19,8 +19,12 @@ const UI = (function () {
     lockRatio: true,
     selectedRatio: '1:1',
     lastChangedDimension: 'width',
-    isProcessing: false
+    isProcessing: false,
+    lastFocusedElement: null
   };
+
+  // モーダルのフォーカストラップ用
+  let focusTrapHandler = null;
 
   /**
    * DOM要素を取得してキャッシュ
@@ -761,15 +765,65 @@ const UI = (function () {
     elements.btnPrivacyToggle.setAttribute('aria-expanded', isExpanded);
   }
 
+  function getFocusableElements(container) {
+    const selector = [
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+    return Array.from(container.querySelectorAll(selector));
+  }
+
+  function trapFocus(container) {
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    focusTrapHandler = event => {
+      if (event.key !== 'Tab') return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    container.addEventListener('keydown', focusTrapHandler);
+    first.focus();
+  }
+
+  function releaseFocus(container) {
+    if (focusTrapHandler) {
+      container.removeEventListener('keydown', focusTrapHandler);
+      focusTrapHandler = null;
+    }
+    if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+      state.lastFocusedElement.focus();
+    }
+    state.lastFocusedElement = null;
+  }
+
   function openPrivacyModal() {
+    if (!elements.privacyModal.hidden) return;
+    state.lastFocusedElement = document.activeElement;
     elements.privacyModal.hidden = false;
     document.body.style.overflow = 'hidden';
-    elements.btnModalClose.focus();
+    trapFocus(elements.privacyModal);
   }
 
   function closePrivacyModal() {
+    if (elements.privacyModal.hidden) return;
     elements.privacyModal.hidden = true;
     document.body.style.overflow = '';
+    releaseFocus(elements.privacyModal);
   }
 
   // ========== トースト ==========
@@ -778,6 +832,14 @@ const UI = (function () {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
+    toast.setAttribute('aria-atomic', 'true');
+    if (type === 'error') {
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+    } else {
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+    }
     toast.style.opacity = '1';
     toast.style.transition = 'opacity 0.3s ease';
     elements.toastContainer.appendChild(toast);
