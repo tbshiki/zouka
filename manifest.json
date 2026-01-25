@@ -1,0 +1,24 @@
+{
+  "name": "zouka",
+  "short_name": "zouka",
+  "description": "A fully local image resize and format conversion tool. Process images safely in your browser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8250df",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "utilities",
+    "photo"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any"
+}

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Analytics is managed by Cloudflare Zaraz -->
+    <meta name="description" content="zouka - A fully local image resize and format conversion tool. Process images safely in your browser without sending data to any server.">
+    <meta name="robots" content="index,follow">
+    <meta property="og:title" content="zouka - Image Resize & Convert Tool">
+    <meta property="og:description" content="Resize and convert images in your browser. Fully local processing for privacy protection.">
+    <meta property="og:type" content="website">
+    <title>zouka - Image Resize & Convert Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Favicon & PWA -->
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- SEO & OGP -->
+    <link rel="canonical" href="https://zouka.taptoclicks.com/">
+    <link rel="sitemap" type="application/xml" href="https://zouka.taptoclicks.com/sitemap.xml">
+    <meta property="og:url" content="https://zouka.taptoclicks.com/">
+    <meta property="og:image" content="https://zouka.taptoclicks.com/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="zouka - Image Resize & Convert Tool">
+    <meta name="twitter:description" content="Resize and convert images in your browser. Fully local processing for privacy protection.">
+    <meta name="twitter:image" content="https://zouka.taptoclicks.com/logo.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" nonce="__CSP_NONCE__">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "zouka",
+        "description": "A fully local image resize and format conversion tool. Process images safely in your browser without sending data to any server.",
+        "url": "https://zouka.taptoclicks.com/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Image resize",
+            "Format conversion",
+            "AVIF/WebP/PNG/JPEG support",
+            "Fully local processing",
+            "Privacy protection"
+        ]
+    }
+    </script>
+</head>
+
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#drop-zone" class="skip-link" data-i18n="skip.link">Skip to main content</a>
+
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">
+                <a class="logo-link" href="./">
+                    <span class="logo-icon" aria-hidden="true">🖼️</span>
+                    <span class="logo-text">zouka</span>
+                </a>
+            </h1>
+            <p class="tagline" data-i18n="header.tagline">Image Resize & Convert Tool</p>
+        </div>
+        <div class="header-actions">
+            <button id="btn-lang-toggle" class="btn-lang-toggle" title="言語切替" aria-label="Switch language" data-i18n="header.lang.title" data-i18n-attr="title" data-i18n-aria="header.lang.aria">
+                <span class="lang-icon" aria-hidden="true">JA</span>
+            </button>
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="テーマ切替" aria-label="Toggle between dark and light mode" data-i18n="header.theme.title" data-i18n-attr="title" data-i18n-aria="header.theme.aria">
+                <span class="theme-icon" aria-hidden="true">☀️</span>
+            </button>
+        </div>
+    </header>
+
+    <main id="main-content" class="main-container">
+        <!-- Browser Compatibility Notice -->
+        <div id="avif-notice" class="notice-banner hidden" role="alert">
+            <span class="notice-icon" aria-hidden="true">⚠️</span>
+            <span data-i18n="notice.avifUnsupported">AVIF format is not supported in this browser.</span>
+        </div>
+
+        <!-- Input Section -->
+        <section class="input-section" aria-label="Image input area" data-i18n="input.section.aria" data-i18n-attr="aria-label">
+            <!-- Drop Zone -->
+            <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Click or drop image file here" data-i18n="dropzone.aria" data-i18n-attr="aria-label">
+                <div class="drop-zone-content">
+                    <span class="drop-zone-icon" aria-hidden="true">📁</span>
+                    <p class="drop-zone-text" data-i18n="dropzone.text">Drop image here or click to select</p>
+                    <p class="drop-zone-hint" data-i18n="dropzone.hint">Supports: JPEG, PNG, WebP, GIF, AVIF (max 20MB)</p>
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="file-input" aria-hidden="true">
+            </div>
+
+            <!-- Original Image Info -->
+            <div id="original-info" class="info-panel hidden">
+                <h2 class="info-title" data-i18n="info.original.title">Original Image</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label" data-i18n="info.filename">Filename</span>
+                        <span id="info-filename" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label" data-i18n="info.dimensions">Dimensions</span>
+                        <span id="info-dimensions" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label" data-i18n="info.aspectRatio">Aspect Ratio</span>
+                        <span id="info-aspect" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label" data-i18n="info.fileSize">File Size</span>
+                        <span id="info-size" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label" data-i18n="info.format">Format</span>
+                        <span id="info-format" class="info-value">-</span>
+                    </div>
+                </div>
+                <div class="preview-container">
+                    <img id="preview-image" class="preview-image" alt="Preview of selected image" data-i18n="preview.alt" data-i18n-attr="alt">
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings-section" class="settings-section hidden" aria-label="Resize and conversion settings" data-i18n="settings.section.aria" data-i18n-attr="aria-label">
+            <h2 class="section-title" data-i18n="settings.title">Settings</h2>
+
+            <div class="settings-grid">
+                <!-- Resize Settings -->
+                <div class="settings-card">
+                    <h3 class="card-title" data-i18n="settings.resize.title">Resize</h3>
+
+                    <div class="resize-mode">
+                        <label class="radio-label">
+                            <input type="radio" name="resize-mode" value="custom" checked>
+                            <span data-i18n="settings.resize.custom">Custom Size</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="resize-mode" value="long-edge">
+                            <span data-i18n="settings.resize.longEdge">Long Edge</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="resize-mode" value="preset">
+                            <span data-i18n="settings.resize.preset">Preset Ratio</span>
+                        </label>
+                    </div>
+
+                    <!-- Custom Size Inputs -->
+                    <div id="custom-size-inputs" class="size-inputs">
+                        <div class="input-group">
+                            <label for="input-width" data-i18n="settings.resize.width">Width</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="input-width" min="1" max="8000" placeholder="800">
+                                <span class="unit">px</span>
+                            </div>
+                        </div>
+                        <button id="btn-lock-ratio" class="btn-lock active" title="Lock aspect ratio" aria-pressed="true" data-i18n="settings.resize.lockRatio" data-i18n-attr="title">
+                            <span class="lock-icon" aria-hidden="true">🔗</span>
+                        </button>
+                        <div class="input-group">
+                            <label for="input-height" data-i18n="settings.resize.height">Height</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="input-height" min="1" max="8000" placeholder="600">
+                                <span class="unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Long Edge Input -->
+                    <div id="long-edge-input" class="size-inputs hidden">
+                        <div class="input-group full-width">
+                            <label for="input-long-edge" data-i18n="settings.resize.longEdgeLabel">Long Edge</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="input-long-edge" min="1" max="8000" placeholder="1920">
+                                <span class="unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preset Ratio Selector -->
+                    <div id="preset-ratio-inputs" class="size-inputs hidden">
+                        <div class="preset-buttons">
+                            <button class="btn-preset" data-ratio="1:1">1:1</button>
+                            <button class="btn-preset" data-ratio="4:3">4:3</button>
+                            <button class="btn-preset" data-ratio="3:4">3:4</button>
+                            <button class="btn-preset" data-ratio="16:9">16:9</button>
+                            <button class="btn-preset" data-ratio="9:16">9:16</button>
+                        </div>
+                        <div class="input-group full-width">
+                            <label for="input-preset-width" data-i18n="settings.resize.baseWidth">Base Width</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="input-preset-width" min="1" max="8000" placeholder="1080">
+                                <span class="unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Format Settings -->
+                <div class="settings-card">
+                    <h3 class="card-title" data-i18n="settings.format.title">Output Format</h3>
+
+                    <div class="format-selector">
+                        <label class="radio-label format-option">
+                            <input type="radio" name="output-format" value="image/jpeg" checked>
+                            <span class="format-name">JPEG</span>
+                        </label>
+                        <label class="radio-label format-option">
+                            <input type="radio" name="output-format" value="image/png">
+                            <span class="format-name">PNG</span>
+                        </label>
+                        <label class="radio-label format-option">
+                            <input type="radio" name="output-format" value="image/webp">
+                            <span class="format-name">WebP</span>
+                        </label>
+                        <label id="format-avif-label" class="radio-label format-option">
+                            <input type="radio" name="output-format" value="image/avif">
+                            <span class="format-name">AVIF</span>
+                        </label>
+                    </div>
+
+                    <!-- Quality Slider -->
+                    <div id="quality-control" class="quality-control">
+                        <label for="input-quality" data-i18n="settings.format.quality">Quality</label>
+                        <div class="quality-slider">
+                            <input type="range" id="input-quality" min="10" max="100" value="85" step="5">
+                            <span id="quality-value" class="quality-value">85%</span>
+                        </div>
+                    </div>
+
+                    <!-- Background Color (for PNG → JPEG) -->
+                    <div id="bg-color-control" class="bg-color-control hidden">
+                        <label for="input-bg-color" data-i18n="settings.format.bgColor">Background Color</label>
+                        <p class="control-hint" data-i18n="settings.format.bgColorHint">For transparent images converted to JPEG</p>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="input-bg-color" value="#ffffff">
+                            <span id="bg-color-value" class="color-value">#ffffff</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Preview -->
+            <div class="output-preview">
+                <h3 class="card-title" data-i18n="output.preview.title">Output Estimate</h3>
+                <div class="estimate-grid">
+                    <div class="estimate-item">
+                        <span class="estimate-label" data-i18n="output.dimensions">Dimensions</span>
+                        <span id="estimate-dimensions" class="estimate-value">-</span>
+                    </div>
+                    <div class="estimate-item">
+                        <span class="estimate-label" data-i18n="output.pixels">Total Pixels</span>
+                        <span id="estimate-pixels" class="estimate-value">-</span>
+                    </div>
+                    <div class="estimate-item">
+                        <span class="estimate-label" data-i18n="output.rawSize">Raw Size (Est.)</span>
+                        <span id="estimate-raw" class="estimate-value">-</span>
+                    </div>
+                    <div class="estimate-item">
+                        <span class="estimate-label" data-i18n="output.compressedSize">Compressed (Est.)</span>
+                        <span id="estimate-compressed" class="estimate-value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <button id="btn-convert" class="btn-primary" disabled>
+                    <span class="btn-icon" aria-hidden="true">🔄</span>
+                    <span data-i18n="action.convert">Convert</span>
+                </button>
+                <button id="btn-reset" class="btn-secondary">
+                    <span data-i18n="action.reset">Reset</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section id="result-section" class="result-section hidden" aria-label="Conversion result" data-i18n="result.section.aria" data-i18n-attr="aria-label">
+            <h2 class="section-title" data-i18n="result.title">Result</h2>
+
+            <div class="result-comparison">
+                <!-- Original -->
+                <div class="result-card">
+                    <h3 class="card-title" data-i18n="result.original">Original</h3>
+                    <div class="result-preview">
+                        <img id="result-original-img" class="result-image" alt="Original image">
+                    </div>
+                    <div class="result-info">
+                        <span id="result-original-size" class="result-size">-</span>
+                    </div>
+                </div>
+
+                <!-- Converted -->
+                <div class="result-card">
+                    <h3 class="card-title" data-i18n="result.converted">Converted</h3>
+                    <div class="result-preview">
+                        <img id="result-converted-img" class="result-image" alt="Converted image">
+                    </div>
+                    <div class="result-info">
+                        <span id="result-converted-size" class="result-size">-</span>
+                        <span id="result-reduction" class="result-reduction">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="download-bar">
+                <a id="btn-download" class="btn-download" download>
+                    <span class="btn-icon" aria-hidden="true">💾</span>
+                    <span data-i18n="action.download">Download</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Processing Overlay -->
+        <div id="processing-overlay" class="processing-overlay hidden" role="alert" aria-live="assertive">
+            <div class="processing-content">
+                <div class="spinner" aria-hidden="true"></div>
+                <p class="processing-text" data-i18n="processing.text">Converting...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <div class="footer-info">
+                    <span>zouka v0.1.0</span>
+                    <span class="footer-separator">|</span>
+                    <span data-i18n="footer.copyright">© 2026 zouka</span>
+                    <span class="footer-separator">|</span>
+                    <button id="btn-privacy-policy" class="btn-footer-link" type="button" data-i18n="footer.privacy.policy">
+                        Privacy Policy
+                    </button>
+                    <span class="footer-separator">|</span>
+                    <a class="btn-footer-link" href="https://github.com/tbshiki/zouka" target="_blank" rel="noopener noreferrer" data-i18n="footer.repo.link">
+                        GitHub Repository
+                    </a>
+                    <span class="footer-separator">|</span>
+                    <a class="btn-footer-link" href="https://taptoclicks.com" target="_blank" rel="noopener noreferrer" data-i18n="footer.from">
+                        from taptoclicks.com
+                    </a>
+                </div>
+                <button id="btn-privacy-toggle" class="btn-privacy-toggle active" aria-expanded="true"
+                    aria-controls="privacy-details">
+                    🔒 <span data-i18n="footer.privacy.toggle">Privacy</span>
+                    <span class="toggle-icon" aria-hidden="true">▼</span>
+                </button>
+            </div>
+            <div id="privacy-details" class="privacy-details">
+                <ul>
+                    <li>✅ <span data-i18n="footer.privacy.local">This tool processes everything locally</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.noSend">Images are not sent to any server</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.noFetch">No fetch/XMLHttpRequest used - technically impossible to send data</span></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title" data-i18n="privacy.title">Privacy Policy</h2>
+                <button id="btn-modal-close" class="btn-modal-close" type="button" aria-label="Close" data-i18n="modal.close.aria" data-i18n-attr="aria-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section1.title">1. Introduction</h3>
+                    <p data-i18n="privacy.section1.content">zouka (hereinafter "this tool") is a tool for resizing and converting images in your browser. This privacy policy explains how information is handled in this tool.</p>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section2.title">2. Handling of Image Data</h3>
+                    <p>
+                        <span data-i18n="privacy.section2.intro.prefix">Image data loaded into this tool is </span>
+                        <strong data-i18n="privacy.section2.intro.emphasis">processed entirely locally within your browser</strong><span data-i18n="privacy.section2.intro.suffix">.</span>
+                    </p>
+                    <ul>
+                        <li>✅ <span data-i18n="privacy.section2.item1">Images are not sent to any server</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item2">Images are not saved or recorded anywhere</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item3">Image data is deleted when you close the page</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item4">No fetch/XMLHttpRequest - technically impossible to transmit</span></li>
+                    </ul>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section3.title">3. Technical Guarantee</h3>
+                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to technically prevent any network requests for user data. The connect-src directive is set to 'none', making it impossible to send data to external servers.</p>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section4.title">4. Local Storage</h3>
+                    <p data-i18n="privacy.section4.intro">This tool uses local storage only for the following purposes.</p>
+                    <ul>
+                        <li data-i18n="privacy.section4.item1">Saving theme settings (dark/light mode)</li>
+                        <li data-i18n="privacy.section4.item2">Saving language settings</li>
+                    </ul>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section5.title">5. Contact</h3>
+                    <p data-i18n="privacy.section5.content" data-i18n-html="true">
+                        For inquiries about this privacy policy, please use the <a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
+                    </p>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section6.title">6. Amendments</h3>
+                    <p data-i18n="privacy.section6.content">This privacy policy may be amended as necessary. Significant changes will be announced on this tool.</p>
+                    <p class="policy-date" data-i18n="privacy.lastUpdated">Last updated: January 25, 2026</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="i18n.js"></script>
+    <script src="image-processor.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>
