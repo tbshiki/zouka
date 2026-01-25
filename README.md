@@ -8,8 +8,11 @@
 - 🚫 **技術的に送信不能** - fetch/XMLHttpRequest を使用せず、CSP で外部通信を禁止
 - 🖼️ **多形式対応** - JPEG, PNG, WebP, AVIF に対応
 - 📐 **柔軟なリサイズ** - カスタムサイズ、長辺指定、プリセット比率
+- 🎨 **品質調整** - 出力形式ごとの品質設定、背景色指定
+- 📊 **リアルタイム見積もり** - 変換前にサイズを予測
 - 🌙 **ダークモード対応**
 - 🌐 **多言語対応** - 日本語/英語
+- ♿ **アクセシビリティ対応** - キーボード操作、スクリーンリーダー対応
 
 ## 使い方
 
@@ -32,7 +35,7 @@
 - JPEG（品質指定可能）
 - PNG
 - WebP（品質指定可能）
-- AVIF（ブラウザ対応時のみ）
+- AVIF（品質指定可能、ブラウザ対応時のみ）
 
 ## セキュリティ・プライバシー
 
@@ -46,10 +49,11 @@
 
 - HTML5
 - CSS3（CSS カスタムプロパティ、Grid、Flexbox）
-- Vanilla JavaScript
-- File API
-- Canvas API
-- createImageBitmap API
+- Vanilla JavaScript（モジュールパターン）
+- File API / Blob API
+- Canvas API / createImageBitmap API
+- Google Fonts（Noto Sans JP、JetBrains Mono）
+- Cloudflare Pages Functions（CSP nonce 処理）
 
 ## 開発
 
@@ -68,6 +72,9 @@ Cloudflare Pages に静的ホスティング：
 1. GitHub リポジトリに接続
 2. ビルド設定なし（静的ファイルのみ）
 3. ルートディレクトリ: `/`（ルート直接配置）
+4. Functions で CSP nonce を動的に処理
+
+詳細は [DEPLOY.md](DEPLOY.md) を参照してください。
 
 ## ライセンス
 

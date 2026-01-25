@@ -58,19 +58,6 @@ zouka/
     └── _middleware.js  # CSP nonce 処理
 ```
 
-### 重要: logo.png の準備
-
-`logo.png` は以下の用途で使用されます：
-- ファビコン
-- Apple Touch Icon
-- PWA アイコン
-- OGP 画像
-
-**推奨仕様:**
-- サイズ: 512×512 ピクセル
-- 形式: PNG（透過可）
-- 内容: 🖼️ の絵文字または zouka ロゴ
-
 ### デプロイ後の確認
 
 #### 1. 基本動作確認

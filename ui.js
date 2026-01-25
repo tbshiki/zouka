@@ -78,6 +78,8 @@ const UI = (function () {
       resultSection: document.getElementById('result-section'),
       resultOriginalImg: document.getElementById('result-original-img'),
       resultConvertedImg: document.getElementById('result-converted-img'),
+      resultOriginalExt: document.getElementById('result-original-ext'),
+      resultConvertedExt: document.getElementById('result-converted-ext'),
       resultOriginalSize: document.getElementById('result-original-size'),
       resultConvertedSize: document.getElementById('result-converted-size'),
       resultReduction: document.getElementById('result-reduction'),
@@ -575,10 +577,14 @@ const UI = (function () {
     // 元画像
     elements.resultOriginalImg.src = elements.previewImage.src;
     elements.resultOriginalSize.textContent = `${state.originalInfo.width}×${state.originalInfo.height} / ${state.originalInfo.formattedSize}`;
+    const originalExt = getFileExtension(state.originalInfo.filename) || getExtensionFromMime(state.originalInfo.mimeType);
+    elements.resultOriginalExt.textContent = originalExt ? `.${originalExt}` : '-';
 
     // 変換後画像
     elements.resultConvertedImg.src = result.url;
     elements.resultConvertedSize.textContent = `${result.width}×${result.height} / ${result.formattedSize}`;
+    const convertedExt = getExtensionFromMime(format);
+    elements.resultConvertedExt.textContent = convertedExt ? `.${convertedExt}` : '-';
 
     // サイズ削減率
     const reduction = parseFloat(((state.originalInfo.fileSize - result.size) / state.originalInfo.fileSize * 100).toFixed(1));
@@ -618,6 +624,24 @@ const UI = (function () {
       ImageProcessor.revokeURL(state.convertedUrl);
       state.convertedUrl = null;
     }
+  }
+
+  function getFileExtension(filename) {
+    if (!filename) return null;
+    const match = filename.match(/\.([^.]+)$/);
+    return match ? match[1].toLowerCase() : null;
+  }
+
+  function getExtensionFromMime(mimeType) {
+    if (!mimeType) return null;
+    const map = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+      'image/avif': 'avif'
+    };
+    return map[mimeType] || (mimeType.includes('/') ? mimeType.split('/')[1] : null);
   }
 
   // ========== 処理中オーバーレイ ==========
