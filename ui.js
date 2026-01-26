@@ -761,7 +761,7 @@ const UI = (function () {
 
   function togglePrivacyDetails() {
     const isExpanded = elements.btnPrivacyToggle.classList.toggle('active');
-    elements.privacyDetails.style.display = isExpanded ? 'block' : 'none';
+    elements.privacyDetails.classList.toggle('hidden', !isExpanded);
     elements.btnPrivacyToggle.setAttribute('aria-expanded', isExpanded);
   }
 
@@ -815,14 +815,14 @@ const UI = (function () {
     if (!elements.privacyModal.hidden) return;
     state.lastFocusedElement = document.activeElement;
     elements.privacyModal.hidden = false;
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
     trapFocus(elements.privacyModal);
   }
 
   function closePrivacyModal() {
     if (elements.privacyModal.hidden) return;
     elements.privacyModal.hidden = true;
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
     releaseFocus(elements.privacyModal);
   }
 
@@ -840,12 +840,10 @@ const UI = (function () {
       toast.setAttribute('role', 'status');
       toast.setAttribute('aria-live', 'polite');
     }
-    toast.style.opacity = '1';
-    toast.style.transition = 'opacity 0.3s ease';
     elements.toastContainer.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.opacity = '0';
+      toast.classList.add('is-closing');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }

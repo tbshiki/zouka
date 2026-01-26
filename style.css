@@ -136,6 +136,10 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 /* Header */
 .header {
     background: var(--bg-secondary);
@@ -1034,6 +1038,20 @@ body {
     color: var(--accent-primary);
 }
 
+.btn-inline-link {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.btn-inline-link:hover {
+    color: var(--accent-secondary);
+}
+
 .btn-privacy-toggle {
     display: flex;
     align-items: center;
@@ -1180,6 +1198,21 @@ body {
     margin-bottom: var(--space-xs);
 }
 
+.policy-notice {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.policy-notice p {
+    margin-bottom: var(--space-xs);
+}
+
+.policy-notice p:last-child {
+    margin-bottom: 0;
+}
+
 .policy-date {
     color: var(--text-muted);
     font-style: italic;
@@ -1203,6 +1236,12 @@ body {
     padding: var(--space-md);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     animation: slideIn 0.3s ease;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.toast.is-closing {
+    opacity: 0;
 }
 
 .toast.success {

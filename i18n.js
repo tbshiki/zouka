@@ -139,6 +139,8 @@ const I18n = (function () {
 
       if (attr) {
         el.setAttribute(attr, translation);
+      } else if (el.hasAttribute('data-i18n-html')) {
+        el.innerHTML = translation;
       } else {
         el.textContent = translation;
       }
