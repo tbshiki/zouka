@@ -212,6 +212,19 @@ const ImageProcessor = (function () {
         newHeight = originalHeight;
     }
 
+    const shouldPreserveRatio = options.mode === 'long-edge' ||
+      options.mode === 'preset' ||
+      (options.mode === 'custom' && options.lockRatio);
+
+    if (shouldPreserveRatio) {
+      const maxDim = Math.max(newWidth, newHeight);
+      if (maxDim > CONFIG.MAX_DIMENSION) {
+        const scale = CONFIG.MAX_DIMENSION / maxDim;
+        newWidth = Math.max(1, Math.round(newWidth * scale));
+        newHeight = Math.max(1, Math.round(newHeight * scale));
+      }
+    }
+
     // 上限ガード
     newWidth = Math.min(Math.max(1, Math.round(newWidth)), CONFIG.MAX_DIMENSION);
     newHeight = Math.min(Math.max(1, Math.round(newHeight)), CONFIG.MAX_DIMENSION);
@@ -269,7 +282,7 @@ const ImageProcessor = (function () {
       if (originalFormat === 'image/png' && format !== 'image/png') {
         formatMultiplier *= format === 'image/avif' ? 1.35 : 1.2;
       } else if (originalFormat === 'image/jpeg' && format === 'image/avif') {
-        formatMultiplier *= 1.1;
+        formatMultiplier *= 1.25;
       }
 
       estimatedCompressed = Math.max(1024, Math.round(baseSize * formatMultiplier * qualityMultiplier));
