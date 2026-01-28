@@ -5,11 +5,14 @@
 ## 特徴
 
 - 🔒 **完全ローカル処理** - 画像は一切サーバーに送信されません
-- 🚫 **技術的に送信不能** - fetch/XMLHttpRequest を使用せず、CSP で外部通信を禁止
+- 🚫 **外部送信を制限** - Analytics（Zaraz/Clarity）以外の通信をCSPで制限、画像は送信しません
 - 🖼️ **多形式対応** - JPEG, PNG, WebP, AVIF に対応
 - 📐 **柔軟なリサイズ** - カスタムサイズ、長辺指定、プリセット比率
+- 🎨 **品質調整** - 出力形式ごとの品質設定、背景色指定
+- 📊 **リアルタイム見積もり** - 変換前にサイズを予測
 - 🌙 **ダークモード対応**
 - 🌐 **多言語対応** - 日本語/英語
+- ♿ **アクセシビリティ対応** - キーボード操作、スクリーンリーダー対応
 
 ## 使い方
 
@@ -32,26 +35,29 @@
 - JPEG（品質指定可能）
 - PNG
 - WebP（品質指定可能）
-- AVIF（ブラウザ対応時のみ）
+- AVIF（品質指定可能、ブラウザ対応時のみ）
 
 ## セキュリティ・プライバシー
 
 このツールは以下の方法でプライバシーを保護しています：
 
 1. **ローカル処理のみ** - すべての処理はブラウザ内で完結
-2. **ネットワーク通信なし** - JavaScript で `fetch` や `XMLHttpRequest` を一切使用しない
-3. **CSP による制限** - `connect-src: 'none'` により外部通信を技術的に禁止
+2. **Analytics は利用状況のみ** - Zaraz/Clarityで計測、画像データは送信しない
+3. **CSP による制限** - 翻訳JSONと分析の許可ドメインのみ通信可能
 
 ## 技術スタック
 
 - HTML5
 - CSS3（CSS カスタムプロパティ、Grid、Flexbox）
-- Vanilla JavaScript
-- File API
-- Canvas API
-- createImageBitmap API
+- Vanilla JavaScript（モジュールパターン）
+- File API / Blob API
+- Canvas API / createImageBitmap API
+- Google Fonts（Noto Sans JP、JetBrains Mono）
+- Cloudflare Pages Functions（CSP nonce 処理）
 
 ## 開発
+
+翻訳ファイルは `locales/*.json` を読み込むため、ローカルサーバーでの起動を推奨します。
 
 ```bash
 # ローカルサーバーで実行
@@ -68,6 +74,9 @@ Cloudflare Pages に静的ホスティング：
 1. GitHub リポジトリに接続
 2. ビルド設定なし（静的ファイルのみ）
 3. ルートディレクトリ: `/`（ルート直接配置）
+4. Functions で CSP nonce を動的に処理
+
+詳細は [DEPLOY.md](DEPLOY.md) を参照してください。
 
 ## ライセンス
 

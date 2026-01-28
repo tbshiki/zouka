@@ -73,7 +73,7 @@
         <div class="header-content">
             <h1 class="logo">
                 <a class="logo-link" href="./">
-                    <span class="logo-icon" aria-hidden="true">🖼️</span>
+                    <img class="logo-icon" src="logo.png" alt="" aria-hidden="true">
                     <span class="logo-text">zouka</span>
                 </a>
             </h1>
@@ -117,7 +117,7 @@
                     <p class="drop-zone-text" data-i18n="dropzone.text">Drop image here or click to select</p>
                     <p class="drop-zone-hint" data-i18n="dropzone.hint">Supports: JPEG, PNG, WebP, GIF, AVIF (max 20MB)</p>
                 </div>
-                <input type="file" id="file-input" accept="image/*" class="file-input" aria-hidden="true">
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,.jpg,.jpeg,.png,.webp,.gif,.avif" class="file-input" aria-hidden="true">
             </div>
 
             <!-- Original Image Info -->
@@ -254,7 +254,7 @@
                         <label for="input-quality" data-i18n="settings.format.quality">Quality</label>
                         <div class="quality-slider">
                             <input type="range" id="input-quality" min="10" max="100" value="85" step="5">
-                            <span id="quality-value" class="quality-value">85%</span>
+                            <span id="quality-value" class="quality-value">85</span>
                         </div>
                     </div>
 
@@ -291,6 +291,23 @@
                         <span id="estimate-compressed" class="estimate-value">-</span>
                     </div>
                 </div>
+                <div id="estimate-delta" class="estimate-delta estimate-delta--neutral" aria-live="polite">
+                    <span id="estimate-delta-icon" class="estimate-delta-icon" aria-hidden="true">↔</span>
+                    <span id="estimate-delta-text" class="estimate-delta-text" data-i18n="output.change.placeholder">Select an image to see size change</span>
+                </div>
+                <p class="estimate-note" data-i18n="output.estimateNote">* Estimates are rough approximations. Actual size may vary significantly.</p>
+            </div>
+
+            <!-- Warnings -->
+            <div id="warning-area" class="warning-area hidden">
+                <div id="warning-size-increase" class="warning-item hidden">
+                    <span class="warning-icon" aria-hidden="true">📈</span>
+                    <span data-i18n="warning.sizeIncrease">File size may increase with current settings.</span>
+                </div>
+                <div id="warning-aspect-flip" class="warning-item hidden">
+                    <span class="warning-icon" aria-hidden="true">🔄</span>
+                    <span data-i18n="warning.aspectFlip">Aspect ratio will be flipped (portrait ↔ landscape).</span>
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -312,7 +329,10 @@
             <div class="result-comparison">
                 <!-- Original -->
                 <div class="result-card">
-                    <h3 class="card-title" data-i18n="result.original">Original</h3>
+                    <h3 class="card-title result-card-title">
+                        <span data-i18n="result.original">Original</span>
+                        <span id="result-original-ext" class="result-ext">-</span>
+                    </h3>
                     <div class="result-preview">
                         <img id="result-original-img" class="result-image" alt="Original image" data-i18n="result.original" data-i18n-attr="alt">
                     </div>
@@ -323,7 +343,10 @@
 
                 <!-- Converted -->
                 <div class="result-card">
-                    <h3 class="card-title" data-i18n="result.converted">Converted</h3>
+                    <h3 class="card-title result-card-title">
+                        <span data-i18n="result.converted">Converted</span>
+                        <span id="result-converted-ext" class="result-ext">-</span>
+                    </h3>
                     <div class="result-preview">
                         <img id="result-converted-img" class="result-image" alt="Converted image" data-i18n="result.converted" data-i18n-attr="alt">
                     </div>
@@ -367,9 +390,11 @@
                         GitHub Repository
                     </a>
                     <span class="footer-separator">|</span>
-                    <a class="btn-footer-link" href="https://taptoclicks.com" target="_blank" rel="noopener noreferrer" data-i18n="footer.from">
-                        from taptoclicks.com
-                    </a>
+                    <span class="footer-from" data-i18n="footer.from" data-i18n-html="true">
+                        Created by <a class="btn-footer-link" href="https://x.com/tbshiki/" target="_blank" rel="noopener noreferrer">@tbshiki</a>
+                        from <a class="btn-footer-link" href="https://taptoclicks.com" target="_blank" rel="noopener noreferrer">taptoclicks.com</a>
+                        at <a class="btn-footer-link" href="https://hogehoge.co.jp" target="_blank" rel="noopener noreferrer">hogehoge Inc.</a>
+                    </span>
                 </div>
                 <button type="button" id="btn-privacy-toggle" class="btn-privacy-toggle active" aria-expanded="true"
                     aria-controls="privacy-details">
@@ -380,8 +405,8 @@
             <div id="privacy-details" class="privacy-details">
                 <ul>
                     <li>✅ <span data-i18n="footer.privacy.local">This tool processes everything locally</span></li>
-                    <li>✅ <span data-i18n="footer.privacy.noSend">Images are not sent to any server</span></li>
-                    <li>✅ <span data-i18n="footer.privacy.noFetch">No fetch/XMLHttpRequest used - technically impossible to send data</span></li>
+                    <li>✅ <span data-i18n="footer.privacy.noSend">Input content is not sent to any server</span></li>
+                    <li>⚠️ <span data-i18n="footer.privacy.analytics">Analytics are used (</span><button id="btn-privacy-policy-inline" class="btn-inline-link" type="button" data-i18n="footer.privacy.details">details</button>)</li>
                 </ul>
             </div>
         </div>
@@ -413,44 +438,64 @@
                         <strong data-i18n="privacy.section2.intro.emphasis">processed entirely locally within your browser</strong><span data-i18n="privacy.section2.intro.suffix">.</span>
                     </p>
                     <ul>
-                        <li>✅ <span data-i18n="privacy.section2.item1">Images are not sent to any server</span></li>
-                        <li>✅ <span data-i18n="privacy.section2.item2">Images are not saved or recorded anywhere</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item1">Image content is not sent to any server</span></li>
+                        <li>✅ <span data-i18n="privacy.section2.item2">Image content is not saved or recorded</span></li>
                         <li>✅ <span data-i18n="privacy.section2.item3">Image data is deleted when you close the page</span></li>
-                        <li>✅ <span data-i18n="privacy.section2.item4">No fetch/XMLHttpRequest - technically impossible to transmit</span></li>
                     </ul>
                 </section>
 
                 <section class="policy-section">
-                    <h3 data-i18n="privacy.section3.title">3. Technical Guarantee</h3>
-                    <p data-i18n="privacy.section3.content">This tool uses Content-Security-Policy (CSP) headers to technically prevent any network requests for user data. The connect-src directive is set to 'none', making it impossible to send data to external servers.</p>
+                    <h3 data-i18n="privacy.section3.title">3. About Analytics</h3>
+                    <p data-i18n="privacy.section3.intro">This tool uses the following analytics tools for service improvement.</p>
+                    <ul>
+                        <li><strong data-i18n="privacy.section3.ga.label">Google Analytics</strong>: <span data-i18n="privacy.section3.ga.body">Collects statistical information such as visitor count, page views, and device usage</span></li>
+                        <li><strong data-i18n="privacy.section3.clarity.label">Microsoft Clarity</strong>: <span data-i18n="privacy.section3.clarity.body">Collects anonymized user interaction patterns (clicks, scrolls, etc.)</span></li>
+                    </ul>
+                    <p>
+                        <span data-i18n="privacy.section3.note.prefix">These tools may use cookies, but </span>
+                        <strong data-i18n="privacy.section3.note.emphasis">the content of your image input is never collected</strong><span data-i18n="privacy.section3.note.suffix">.</span>
+                    </p>
+                    <p data-i18n="privacy.section3.advanced">Cookies may also be used to create advanced monitoring reports based on tracked events (such as user timelines or funnel reports).</p>
+
+                    <div class="policy-notice">
+                        <p><strong data-i18n="privacy.section3.notice.title">⚠️ About Microsoft Clarity Session Recording</strong></p>
+                        <p data-i18n="privacy.section3.notice.content1">Microsoft Clarity has a feature that records user interactions. While we have configured input areas to be masked, we cannot guarantee complete exclusion due to technical limitations.</p>
+                        <p data-i18n="privacy.section3.notice.content2">If you handle sensitive images, consider blocking third-party cookies in your browser settings or enabling Do Not Track (DNT).</p>
+                    </div>
                 </section>
 
                 <section class="policy-section">
-                    <h3 data-i18n="privacy.section4.title">4. Local Storage</h3>
-                    <p data-i18n="privacy.section4.intro">This tool uses local storage only for the following purposes.</p>
+                    <h3 data-i18n="privacy.section4.title">4. About Cookies</h3>
+                    <p data-i18n="privacy.section4.intro">This tool uses cookies or local storage for the following purposes.</p>
                     <ul>
                         <li data-i18n="privacy.section4.item1">Saving theme settings (dark/light mode)</li>
                         <li data-i18n="privacy.section4.item2">Saving language settings</li>
+                        <li data-i18n="privacy.section4.item3">Analytics (see above)</li>
                     </ul>
                 </section>
 
                 <section class="policy-section">
-                    <h3 data-i18n="privacy.section5.title">5. Contact</h3>
-                    <p data-i18n="privacy.section5.content" data-i18n-html="true">
-                        For inquiries about this privacy policy, please use the <a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
+                    <h3 data-i18n="privacy.section5.title">5. Third-Party Disclosure</h3>
+                    <p data-i18n="privacy.section5.content">Since this tool does not collect image data, no disclosure to third parties is made. Statistical information collected through analytics is handled according to each analytics service's privacy policy.</p>
+                </section>
+
+                <section class="policy-section">
+                    <h3 data-i18n="privacy.section6.title">6. Contact</h3>
+                    <p data-i18n="privacy.section6.content" data-i18n-html="true">
+                        For inquiries about this tool and bug reports, please use <a href="https://github.com/tbshiki/zouka/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
                     </p>
                 </section>
 
                 <section class="policy-section">
-                    <h3 data-i18n="privacy.section6.title">6. Amendments</h3>
-                    <p data-i18n="privacy.section6.content">This privacy policy may be amended as necessary. Significant changes will be announced on this tool.</p>
-                    <p class="policy-date" data-i18n="privacy.lastUpdated">Last updated: January 25, 2026</p>
+                    <h3 data-i18n="privacy.section7.title">7. Amendments</h3>
+                    <p data-i18n="privacy.section7.content">This privacy policy may be amended as necessary. Significant changes will be announced on this tool.</p>
+                    <p class="policy-date" data-i18n="privacy.lastUpdated">Last updated: January 24, 2026</p>
                 </section>
             </div>
         </div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" role="region" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Scripts -->
     <script src="i18n.js"></script>

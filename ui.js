@@ -19,8 +19,12 @@ const UI = (function () {
     lockRatio: true,
     selectedRatio: '1:1',
     lastChangedDimension: 'width',
-    isProcessing: false
+    isProcessing: false,
+    lastFocusedElement: null
   };
+
+  // モーダルのフォーカストラップ用
+  let focusTrapHandler = null;
 
   /**
    * DOM要素を取得してキャッシュ
@@ -69,6 +73,9 @@ const UI = (function () {
       estimatePixels: document.getElementById('estimate-pixels'),
       estimateRaw: document.getElementById('estimate-raw'),
       estimateCompressed: document.getElementById('estimate-compressed'),
+      estimateDelta: document.getElementById('estimate-delta'),
+      estimateDeltaIcon: document.getElementById('estimate-delta-icon'),
+      estimateDeltaText: document.getElementById('estimate-delta-text'),
 
       // Action buttons
       btnConvert: document.getElementById('btn-convert'),
@@ -78,6 +85,8 @@ const UI = (function () {
       resultSection: document.getElementById('result-section'),
       resultOriginalImg: document.getElementById('result-original-img'),
       resultConvertedImg: document.getElementById('result-converted-img'),
+      resultOriginalExt: document.getElementById('result-original-ext'),
+      resultConvertedExt: document.getElementById('result-converted-ext'),
       resultOriginalSize: document.getElementById('result-original-size'),
       resultConvertedSize: document.getElementById('result-converted-size'),
       resultReduction: document.getElementById('result-reduction'),
@@ -100,6 +109,11 @@ const UI = (function () {
       privacyModal: document.getElementById('privacy-modal'),
       btnModalClose: document.getElementById('btn-modal-close'),
       modalBackdrop: document.querySelector('.modal-backdrop'),
+
+      // Warnings
+      warningArea: document.getElementById('warning-area'),
+      warningSizeIncrease: document.getElementById('warning-size-increase'),
+      warningAspectFlip: document.getElementById('warning-aspect-flip'),
 
       // Toast
       toastContainer: document.getElementById('toast-container')
@@ -249,6 +263,7 @@ const UI = (function () {
       displayPreview(file);
       showSettings();
       updateSizeInputs(info.width, info.height);
+      updateFormatControls();
       updateEstimate();
 
       // 変換ボタン有効化
@@ -353,14 +368,38 @@ const UI = (function () {
     // PNG選択時は品質コントロールを非表示
     elements.qualityControl.classList.toggle('hidden', format === 'image/png');
 
-    // JPEG選択時は背景色コントロールを表示
-    elements.bgColorControl.classList.toggle('hidden', format !== 'image/jpeg');
+    // JPEG選択時かつ元画像が透過可能フォーマットの場合のみ背景色コントロールを表示
+    const showBgColor = format === 'image/jpeg' && isOriginalTransparentCapable();
+    elements.bgColorControl.classList.toggle('hidden', !showBgColor);
 
     updateEstimate();
   }
 
+  /**
+   * 元画像が透過をサポートするフォーマットかどうか
+   * @returns {boolean}
+   */
+  function isOriginalTransparentCapable() {
+    if (!state.originalInfo) return false;
+
+    // JPEGは透過をサポートしない
+    const transparentFormats = ['image/png', 'image/webp', 'image/gif', 'image/avif'];
+    return transparentFormats.includes(state.originalInfo.mimeType);
+  }
+
+  /**
+   * フォーマット関連のコントロールを更新
+   */
+  function updateFormatControls() {
+    const format = getOutputFormat();
+
+    // JPEG選択時かつ元画像が透過可能フォーマットの場合のみ背景色コントロールを表示
+    const showBgColor = format === 'image/jpeg' && isOriginalTransparentCapable();
+    elements.bgColorControl.classList.toggle('hidden', !showBgColor);
+  }
+
   function handleQualityChange() {
-    elements.qualityValue.textContent = `${elements.inputQuality.value}%`;
+    elements.qualityValue.textContent = `${elements.inputQuality.value}`;
     updateEstimate();
   }
 
@@ -381,7 +420,11 @@ const UI = (function () {
   }
 
   function updateEstimate() {
-    if (!state.originalInfo) return;
+    if (!state.originalInfo) {
+      resetEstimateDelta();
+      updateWarnings();
+      return;
+    }
 
     const mode = getResizeMode();
     const format = getOutputFormat();
@@ -411,12 +454,119 @@ const UI = (function () {
       options
     );
 
-    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality);
+    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality, state.originalInfo);
 
     elements.estimateDimensions.textContent = estimate.dimensions;
     elements.estimatePixels.textContent = estimate.totalPixels;
     elements.estimateRaw.textContent = estimate.rawSize;
     elements.estimateCompressed.textContent = `~${estimate.estimatedCompressed}`;
+    updateEstimateDelta(estimate);
+
+    // 警告を更新
+    updateWarnings(width, height, estimate);
+  }
+
+  function setEstimateDeltaState(variant, icon, text) {
+    if (!elements.estimateDelta) return;
+    elements.estimateDelta.classList.remove(
+      'estimate-delta--neutral',
+      'estimate-delta--increase',
+      'estimate-delta--decrease'
+    );
+    elements.estimateDelta.classList.add(`estimate-delta--${variant}`);
+    if (elements.estimateDeltaIcon) {
+      elements.estimateDeltaIcon.textContent = icon;
+    }
+    if (elements.estimateDeltaText) {
+      elements.estimateDeltaText.textContent = text;
+    }
+  }
+
+  function resetEstimateDelta() {
+    const placeholder = (typeof I18n !== 'undefined' && I18n.t('output.change.placeholder')) ||
+      'Select an image to see size change';
+    setEstimateDeltaState('neutral', '↔', placeholder);
+  }
+
+  function updateEstimateDelta(estimate) {
+    if (!state.originalInfo || !estimate || !estimate.estimatedCompressedBytes) {
+      resetEstimateDelta();
+      return;
+    }
+
+    const originalSize = state.originalInfo.fileSize;
+    const estimatedSize = estimate.estimatedCompressedBytes;
+    if (!originalSize || originalSize <= 0) {
+      resetEstimateDelta();
+      return;
+    }
+
+    const diff = estimatedSize - originalSize;
+    const percent = Math.abs(diff) / originalSize * 100;
+
+    if (percent < 0.5) {
+      const sameText = (typeof I18n !== 'undefined' && I18n.t('output.change.same')) || 'About the same size';
+      setEstimateDeltaState('neutral', '↔', sameText);
+      return;
+    }
+
+    const percentText = percent.toFixed(1);
+    if (diff < 0) {
+      const smallerText = (typeof I18n !== 'undefined' && I18n.t('output.change.smaller', { percent: percentText })) ||
+        `Smaller by ${percentText}%`;
+      setEstimateDeltaState('decrease', '⬇', smallerText);
+      return;
+    }
+
+    const largerText = (typeof I18n !== 'undefined' && I18n.t('output.change.larger', { percent: percentText })) ||
+      `Larger by ${percentText}%`;
+    setEstimateDeltaState('increase', '⚠️', largerText);
+  }
+
+  // ========== 警告表示 ==========
+
+  function updateWarnings(newWidth = 0, newHeight = 0, estimate = null) {
+    let hasAnyWarning = false;
+
+    // サイズ増加警告
+    // ピクセル数が大幅に増加する場合、またはPNG変換時に警告
+    let showSizeWarning = false;
+    if (state.originalInfo && newWidth > 0 && newHeight > 0) {
+      const originalPixels = state.originalInfo.width * state.originalInfo.height;
+      const newPixels = newWidth * newHeight;
+      const format = getOutputFormat();
+
+      // ピクセル数が50%以上増加する場合
+      if (newPixels > originalPixels * 1.5) {
+        showSizeWarning = true;
+      }
+      // 元がJPEG/WebPでPNGに変換する場合（容量が大幅に増加する可能性）
+      else if (format === 'image/png' &&
+        (state.originalInfo.mimeType === 'image/jpeg' || state.originalInfo.mimeType === 'image/webp')) {
+        showSizeWarning = true;
+      }
+    }
+    elements.warningSizeIncrease.classList.toggle('hidden', !showSizeWarning);
+    if (showSizeWarning) hasAnyWarning = true;
+
+    // 縦横比逆転警告
+    let showAspectFlipWarning = false;
+    if (state.originalInfo && newWidth > 0 && newHeight > 0) {
+      const originalIsLandscape = state.originalInfo.width > state.originalInfo.height;
+      const originalIsPortrait = state.originalInfo.width < state.originalInfo.height;
+      const newIsLandscape = newWidth > newHeight;
+      const newIsPortrait = newWidth < newHeight;
+
+      // 横長→縦長、または縦長→横長になる場合
+      if ((originalIsLandscape && newIsPortrait) || (originalIsPortrait && newIsLandscape)) {
+        showAspectFlipWarning = true;
+      }
+    }
+    elements.warningAspectFlip.classList.toggle('hidden', !showAspectFlipWarning);
+    if (showAspectFlipWarning) hasAnyWarning = true;
+
+    // 警告エリア全体の表示/非表示
+    elements.warningArea.classList.toggle('hidden', !hasAnyWarning);
   }
 
   // ========== 変換処理 ==========
@@ -466,7 +616,14 @@ const UI = (function () {
       // 結果表示
       displayResult(result, format);
 
-      showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
+      // トースト通知
+      if (result.size > state.originalInfo.fileSize) {
+        // それでもサイズが増加した場合（PNG変換時など）
+        const increase = Math.round((result.size / state.originalInfo.fileSize - 1) * 100);
+        showToast(I18n.t('toast.sizeIncreased', { percent: increase }) || `File size increased by ${increase}%`, 'warning');
+      } else {
+        showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
+      }
 
     } catch (error) {
       console.error('Conversion error:', error);
@@ -481,19 +638,30 @@ const UI = (function () {
     // 元画像
     elements.resultOriginalImg.src = elements.previewImage.src;
     elements.resultOriginalSize.textContent = `${state.originalInfo.width}×${state.originalInfo.height} / ${state.originalInfo.formattedSize}`;
+    const originalExt = getFileExtension(state.originalInfo.filename) || getExtensionFromMime(state.originalInfo.mimeType);
+    elements.resultOriginalExt.textContent = originalExt ? `.${originalExt}` : '-';
 
     // 変換後画像
     elements.resultConvertedImg.src = result.url;
     elements.resultConvertedSize.textContent = `${result.width}×${result.height} / ${result.formattedSize}`;
+    const convertedExt = getExtensionFromMime(format);
+    elements.resultConvertedExt.textContent = convertedExt ? `.${convertedExt}` : '-';
 
     // サイズ削減率
     const reduction = parseFloat(((state.originalInfo.fileSize - result.size) / state.originalInfo.fileSize * 100).toFixed(1));
     if (reduction > 0) {
       elements.resultReduction.textContent = `-${reduction}%`;
       elements.resultReduction.classList.remove('increase');
+      elements.resultReduction.classList.remove('warning');
     } else {
       elements.resultReduction.textContent = `+${Math.abs(reduction)}%`;
       elements.resultReduction.classList.add('increase');
+      // 20%以上増加した場合は警告色
+      if (Math.abs(reduction) >= 20) {
+        elements.resultReduction.classList.add('warning');
+      } else {
+        elements.resultReduction.classList.remove('warning');
+      }
     }
 
     // ダウンロードリンク
@@ -517,6 +685,24 @@ const UI = (function () {
       ImageProcessor.revokeURL(state.convertedUrl);
       state.convertedUrl = null;
     }
+  }
+
+  function getFileExtension(filename) {
+    if (!filename) return null;
+    const match = filename.match(/\.([^.]+)$/);
+    return match ? match[1].toLowerCase() : null;
+  }
+
+  function getExtensionFromMime(mimeType) {
+    if (!mimeType) return null;
+    const map = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+      'image/avif': 'avif'
+    };
+    return map[mimeType] || (mimeType.includes('/') ? mimeType.split('/')[1] : null);
   }
 
   // ========== 処理中オーバーレイ ==========
@@ -550,9 +736,14 @@ const UI = (function () {
     // UI リセット
     elements.fileInput.value = '';
     elements.originalInfo.classList.add('hidden');
-    elements.settingsSection.classList.add('hidden');
     elements.previewImage.src = '';
     elements.btnConvert.disabled = true;
+
+    // 警告エリアをクリア
+    elements.warningArea.classList.add('hidden');
+    elements.warningSizeIncrease.classList.add('hidden');
+    elements.warningAspectFlip.classList.add('hidden');
+    resetEstimateDelta();
 
     // 設定をデフォルトに
     elements.inputWidth.value = '';
@@ -562,7 +753,7 @@ const UI = (function () {
     document.querySelector('input[name="resize-mode"][value="custom"]').checked = true;
     document.querySelector('input[name="output-format"][value="image/jpeg"]').checked = true;
     elements.inputQuality.value = 85;
-    elements.qualityValue.textContent = '85%';
+    elements.qualityValue.textContent = '85';
     elements.customSizeInputs.classList.remove('hidden');
     elements.longEdgeInput.classList.add('hidden');
     elements.presetRatioInputs.classList.add('hidden');
@@ -628,19 +819,69 @@ const UI = (function () {
 
   function togglePrivacyDetails() {
     const isExpanded = elements.btnPrivacyToggle.classList.toggle('active');
-    elements.privacyDetails.style.display = isExpanded ? 'block' : 'none';
+    elements.privacyDetails.classList.toggle('hidden', !isExpanded);
     elements.btnPrivacyToggle.setAttribute('aria-expanded', isExpanded);
   }
 
+  function getFocusableElements(container) {
+    const selector = [
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+    return Array.from(container.querySelectorAll(selector));
+  }
+
+  function trapFocus(container) {
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    focusTrapHandler = event => {
+      if (event.key !== 'Tab') return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    container.addEventListener('keydown', focusTrapHandler);
+    first.focus();
+  }
+
+  function releaseFocus(container) {
+    if (focusTrapHandler) {
+      container.removeEventListener('keydown', focusTrapHandler);
+      focusTrapHandler = null;
+    }
+    if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+      state.lastFocusedElement.focus();
+    }
+    state.lastFocusedElement = null;
+  }
+
   function openPrivacyModal() {
+    if (!elements.privacyModal.hidden) return;
+    state.lastFocusedElement = document.activeElement;
     elements.privacyModal.hidden = false;
-    document.body.style.overflow = 'hidden';
-    elements.btnModalClose.focus();
+    document.body.classList.add('modal-open');
+    trapFocus(elements.privacyModal);
   }
 
   function closePrivacyModal() {
+    if (elements.privacyModal.hidden) return;
     elements.privacyModal.hidden = true;
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+    releaseFocus(elements.privacyModal);
   }
 
   // ========== トースト ==========
@@ -649,12 +890,18 @@ const UI = (function () {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    toast.style.opacity = '1';
-    toast.style.transition = 'opacity 0.3s ease';
+    toast.setAttribute('aria-atomic', 'true');
+    if (type === 'error') {
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+    } else {
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+    }
     elements.toastContainer.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.opacity = '0';
+      toast.classList.add('is-closing');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }

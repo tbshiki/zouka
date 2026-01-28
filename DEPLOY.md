@@ -58,19 +58,6 @@ zouka/
     └── _middleware.js  # CSP nonce 処理
 ```
 
-### 重要: logo.png の準備
-
-`logo.png` は以下の用途で使用されます：
-- ファビコン
-- Apple Touch Icon
-- PWA アイコン
-- OGP 画像
-
-**推奨仕様:**
-- サイズ: 512×512 ピクセル
-- 形式: PNG（透過可）
-- 内容: 🖼️ の絵文字または zouka ロゴ
-
 ### デプロイ後の確認
 
 #### 1. 基本動作確認
@@ -86,7 +73,7 @@ curl -I https://zouka.taptoclicks.com/
 ```
 
 以下のヘッダーが返されることを確認：
-- `Content-Security-Policy` に `connect-src 'none'` が含まれる
+- `Content-Security-Policy` に `connect-src 'self' https://www.clarity.ms https://c.clarity.ms https://cloudflareinsights.com` が含まれる
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 
