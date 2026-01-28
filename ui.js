@@ -114,6 +114,7 @@ const UI = (function () {
       warningArea: document.getElementById('warning-area'),
       warningSizeIncrease: document.getElementById('warning-size-increase'),
       warningAspectFlip: document.getElementById('warning-aspect-flip'),
+      warningAnimatedGif: document.getElementById('warning-animated-gif'),
 
       // Toast
       toastContainer: document.getElementById('toast-container')
@@ -564,6 +565,11 @@ const UI = (function () {
     }
     elements.warningAspectFlip.classList.toggle('hidden', !showAspectFlipWarning);
     if (showAspectFlipWarning) hasAnyWarning = true;
+
+    // アニメーションGIF警告
+    const showAnimatedGifWarning = !!state.originalInfo?.isAnimatedGif;
+    elements.warningAnimatedGif.classList.toggle('hidden', !showAnimatedGifWarning);
+    if (showAnimatedGifWarning) hasAnyWarning = true;
 
     // 警告エリア全体の表示/非表示
     elements.warningArea.classList.toggle('hidden', !hasAnyWarning);

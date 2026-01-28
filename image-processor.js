@@ -110,6 +110,75 @@ const ImageProcessor = (function () {
   }
 
   /**
+   * GIFがアニメーションかどうかを判定
+   * @param {Uint8Array} bytes
+   * @returns {boolean}
+   */
+  function isAnimatedGif(bytes) {
+    if (!bytes || bytes.length < 14) return false;
+    const header = String.fromCharCode(...bytes.slice(0, 6));
+    if (header !== 'GIF87a' && header !== 'GIF89a') return false;
+
+    const packed = bytes[10];
+    const hasGct = (packed & 0x80) !== 0;
+    const gctSize = hasGct ? 3 * (1 << ((packed & 0x07) + 1)) : 0;
+
+    let i = 13 + gctSize;
+    let frames = 0;
+
+    while (i < bytes.length) {
+      const blockId = bytes[i];
+
+      if (blockId === 0x3B) {
+        break; // Trailer
+      }
+
+      if (blockId === 0x2C) {
+        // Image Descriptor
+        if (i + 9 >= bytes.length) break;
+        const localPacked = bytes[i + 9];
+        const hasLct = (localPacked & 0x80) !== 0;
+        const lctSize = hasLct ? 3 * (1 << ((localPacked & 0x07) + 1)) : 0;
+
+        frames += 1;
+        if (frames > 1) return true;
+
+        i += 10; // move past image descriptor
+        i += lctSize;
+        if (i >= bytes.length) break;
+
+        // LZW min code size
+        i += 1;
+
+        // Image data sub-blocks
+        while (i < bytes.length) {
+          const blockSize = bytes[i];
+          i += 1;
+          if (blockSize === 0) break;
+          i += blockSize;
+        }
+        continue;
+      }
+
+      if (blockId === 0x21) {
+        // Extension block
+        i += 2; // skip 0x21 and label
+        while (i < bytes.length) {
+          const blockSize = bytes[i];
+          i += 1;
+          if (blockSize === 0) break;
+          i += blockSize;
+        }
+        continue;
+      }
+
+      i += 1;
+    }
+
+    return false;
+  }
+
+  /**
    * ファイル検証
    * @param {File} file
    * @returns {{valid: boolean, errorKey?: string}}
@@ -149,6 +218,16 @@ const ImageProcessor = (function () {
     }
     const mimeType = resolveMimeType(file);
 
+    let isAnimated = false;
+    if (mimeType === 'image/gif') {
+      try {
+        const buffer = await file.arrayBuffer();
+        isAnimated = isAnimatedGif(new Uint8Array(buffer));
+      } catch (error) {
+        isAnimated = false;
+      }
+    }
+
     const info = {
       filename: file.name,
       width: bitmap.width,
@@ -156,7 +235,8 @@ const ImageProcessor = (function () {
       aspectRatio: calculateAspectRatio(bitmap.width, bitmap.height),
       fileSize: file.size,
       formattedSize: formatFileSize(file.size),
-      mimeType: mimeType || file.type
+      mimeType: mimeType || file.type,
+      isAnimatedGif: isAnimated
     };
 
     return { bitmap, info };

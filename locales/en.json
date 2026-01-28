@@ -56,6 +56,7 @@
   "processing.text": "Converting...",
   "warning.sizeIncrease": "File size may increase with current settings.",
   "warning.aspectFlip": "Aspect ratio will be flipped (portrait ↔ landscape).",
+  "warning.animatedGif": "Animated GIFs will be converted using the first frame only.",
   "toast.convertSuccess": "Conversion complete!",
   "toast.convertError": "Conversion failed",
   "toast.sizeIncreased": "Warning: File size increased by {{percent}}%",

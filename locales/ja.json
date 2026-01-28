@@ -56,6 +56,7 @@
   "processing.text": "変換中...",
   "warning.sizeIncrease": "現在の設定ではファイルサイズが増加する可能性があります。",
   "warning.aspectFlip": "縦横比が逆転します（縦長 ↔ 横長）。",
+  "warning.animatedGif": "アニメーションGIFは1フレーム目のみで変換されます。",
   "toast.convertSuccess": "変換が完了しました！",
   "toast.convertError": "変換に失敗しました",
   "toast.sizeIncreased": "注意: ファイルサイズが{{percent}}%増加しました",
