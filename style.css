@@ -730,6 +730,52 @@ body.modal-open {
     font-style: italic;
 }
 
+.estimate-delta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    margin-top: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-primary);
+    background: var(--bg-tertiary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.estimate-delta-icon {
+    font-size: 1rem;
+}
+
+.estimate-delta-text {
+    font-family: var(--font-mono);
+}
+
+.estimate-delta--neutral {
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+}
+
+.estimate-delta--increase {
+    color: var(--warning-text);
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+}
+
+.estimate-delta--increase.estimate-delta--danger {
+    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.4), 0 8px 20px rgba(255, 152, 0, 0.25);
+    animation: pulseWarning 1s ease-in-out 3;
+}
+
+.estimate-delta--decrease {
+    color: var(--success-text);
+    background: linear-gradient(135deg, rgba(88, 227, 255, 0.18), rgba(130, 80, 223, 0.16));
+    border-color: rgba(88, 227, 255, 0.45);
+    box-shadow: 0 10px 24px rgba(88, 227, 255, 0.18);
+}
+
 /* Warning Area */
 .warning-area {
     display: flex;

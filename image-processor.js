@@ -259,7 +259,9 @@ const ImageProcessor = (function () {
       dimensions: `${width} × ${height}`,
       totalPixels: totalPixels.toLocaleString(),
       rawSize: formatFileSize(rawSize),
-      estimatedCompressed: formatFileSize(estimatedCompressed)
+      rawSizeBytes: rawSize,
+      estimatedCompressed: formatFileSize(estimatedCompressed),
+      estimatedCompressedBytes: estimatedCompressed
     };
   }
 

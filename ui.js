@@ -73,6 +73,9 @@ const UI = (function () {
       estimatePixels: document.getElementById('estimate-pixels'),
       estimateRaw: document.getElementById('estimate-raw'),
       estimateCompressed: document.getElementById('estimate-compressed'),
+      estimateDelta: document.getElementById('estimate-delta'),
+      estimateDeltaIcon: document.getElementById('estimate-delta-icon'),
+      estimateDeltaText: document.getElementById('estimate-delta-text'),
 
       // Action buttons
       btnConvert: document.getElementById('btn-convert'),
@@ -418,6 +421,7 @@ const UI = (function () {
 
   function updateEstimate() {
     if (!state.originalInfo) {
+      resetEstimateDelta();
       updateWarnings();
       return;
     }
@@ -456,9 +460,72 @@ const UI = (function () {
     elements.estimatePixels.textContent = estimate.totalPixels;
     elements.estimateRaw.textContent = estimate.rawSize;
     elements.estimateCompressed.textContent = `~${estimate.estimatedCompressed}`;
+    updateEstimateDelta(estimate);
 
     // 警告を更新
     updateWarnings(width, height, estimate);
+  }
+
+  function setEstimateDeltaState(variant, icon, text, isDanger = false) {
+    if (!elements.estimateDelta) return;
+    elements.estimateDelta.classList.remove(
+      'estimate-delta--neutral',
+      'estimate-delta--increase',
+      'estimate-delta--decrease',
+      'estimate-delta--danger'
+    );
+    elements.estimateDelta.classList.add(`estimate-delta--${variant}`);
+    if (isDanger) {
+      elements.estimateDelta.classList.add('estimate-delta--danger');
+    }
+    if (elements.estimateDeltaIcon) {
+      elements.estimateDeltaIcon.textContent = icon;
+    }
+    if (elements.estimateDeltaText) {
+      elements.estimateDeltaText.textContent = text;
+    }
+  }
+
+  function resetEstimateDelta() {
+    const placeholder = (typeof I18n !== 'undefined' && I18n.t('output.change.placeholder')) ||
+      'Select an image to see size change';
+    setEstimateDeltaState('neutral', '↔', placeholder);
+  }
+
+  function updateEstimateDelta(estimate) {
+    if (!state.originalInfo || !estimate || !estimate.estimatedCompressedBytes) {
+      resetEstimateDelta();
+      return;
+    }
+
+    const originalSize = state.originalInfo.fileSize;
+    const estimatedSize = estimate.estimatedCompressedBytes;
+    if (!originalSize || originalSize <= 0) {
+      resetEstimateDelta();
+      return;
+    }
+
+    const diff = estimatedSize - originalSize;
+    const percent = Math.abs(diff) / originalSize * 100;
+
+    if (percent < 0.5) {
+      const sameText = (typeof I18n !== 'undefined' && I18n.t('output.change.same')) || 'About the same size';
+      setEstimateDeltaState('neutral', '↔', sameText);
+      return;
+    }
+
+    const percentText = percent.toFixed(1);
+    if (diff < 0) {
+      const smallerText = (typeof I18n !== 'undefined' && I18n.t('output.change.smaller', { percent: percentText })) ||
+        `Smaller by ${percentText}%`;
+      setEstimateDeltaState('decrease', '⬇', smallerText);
+      return;
+    }
+
+    const largerText = (typeof I18n !== 'undefined' && I18n.t('output.change.larger', { percent: percentText })) ||
+      `Larger by ${percentText}%`;
+    const isDanger = percent >= 20;
+    setEstimateDeltaState('increase', '⚠️', largerText, isDanger);
   }
 
   // ========== 警告表示 ==========
@@ -686,6 +753,7 @@ const UI = (function () {
     elements.warningArea.classList.add('hidden');
     elements.warningSizeIncrease.classList.add('hidden');
     elements.warningAspectFlip.classList.add('hidden');
+    resetEstimateDelta();
 
     // 設定をデフォルトに
     elements.inputWidth.value = '';
