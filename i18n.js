@@ -42,7 +42,7 @@ const I18n = (function () {
 
     loadPromises[lang] = fetch(`locales/${lang}.json`, {
       method: 'GET',
-      cache: 'force-cache',
+      cache: 'no-store',
       credentials: 'omit',
       mode: 'same-origin'
     })
