@@ -399,7 +399,7 @@ const UI = (function () {
   }
 
   function handleQualityChange() {
-    elements.qualityValue.textContent = `${elements.inputQuality.value}%`;
+    elements.qualityValue.textContent = `${elements.inputQuality.value}`;
     updateEstimate();
   }
 
@@ -454,7 +454,7 @@ const UI = (function () {
       options
     );
 
-    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality);
+    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality, state.originalInfo);
 
     elements.estimateDimensions.textContent = estimate.dimensions;
     elements.estimatePixels.textContent = estimate.totalPixels;
@@ -466,18 +466,14 @@ const UI = (function () {
     updateWarnings(width, height, estimate);
   }
 
-  function setEstimateDeltaState(variant, icon, text, isDanger = false) {
+  function setEstimateDeltaState(variant, icon, text) {
     if (!elements.estimateDelta) return;
     elements.estimateDelta.classList.remove(
       'estimate-delta--neutral',
       'estimate-delta--increase',
-      'estimate-delta--decrease',
-      'estimate-delta--danger'
+      'estimate-delta--decrease'
     );
     elements.estimateDelta.classList.add(`estimate-delta--${variant}`);
-    if (isDanger) {
-      elements.estimateDelta.classList.add('estimate-delta--danger');
-    }
     if (elements.estimateDeltaIcon) {
       elements.estimateDeltaIcon.textContent = icon;
     }
@@ -524,8 +520,7 @@ const UI = (function () {
 
     const largerText = (typeof I18n !== 'undefined' && I18n.t('output.change.larger', { percent: percentText })) ||
       `Larger by ${percentText}%`;
-    const isDanger = percent >= 20;
-    setEstimateDeltaState('increase', '⚠️', largerText, isDanger);
+    setEstimateDeltaState('increase', '⚠️', largerText);
   }
 
   // ========== 警告表示 ==========
@@ -590,8 +585,7 @@ const UI = (function () {
         mode,
         format,
         quality: parseInt(elements.inputQuality.value) / 100,
-        bgColor: elements.inputBgColor.value,
-        originalFileSize: state.originalInfo.fileSize // 元ファイルサイズを渡す
+        bgColor: elements.inputBgColor.value
       };
 
       switch (mode) {
@@ -627,10 +621,6 @@ const UI = (function () {
         // それでもサイズが増加した場合（PNG変換時など）
         const increase = Math.round((result.size / state.originalInfo.fileSize - 1) * 100);
         showToast(I18n.t('toast.sizeIncreased', { percent: increase }) || `File size increased by ${increase}%`, 'warning');
-      } else if (result.qualityReduced) {
-        // 品質を自動調整してサイズを抑えた場合
-        const qualityPercent = Math.round(result.finalQuality * 100);
-        showToast(I18n.t('toast.qualityAdjusted', { quality: qualityPercent }) || `Quality auto-adjusted to ${qualityPercent}% for smaller file`, 'success');
       } else {
         showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
       }
@@ -763,7 +753,7 @@ const UI = (function () {
     document.querySelector('input[name="resize-mode"][value="custom"]').checked = true;
     document.querySelector('input[name="output-format"][value="image/jpeg"]').checked = true;
     elements.inputQuality.value = 85;
-    elements.qualityValue.textContent = '85%';
+    elements.qualityValue.textContent = '85';
     elements.customSizeInputs.classList.remove('hidden');
     elements.longEdgeInput.classList.add('hidden');
     elements.presetRatioInputs.classList.add('hidden');

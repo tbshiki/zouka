@@ -59,7 +59,6 @@
   "toast.convertSuccess": "Conversion complete!",
   "toast.convertError": "Conversion failed",
   "toast.sizeIncreased": "Warning: File size increased by {{percent}}%",
-  "toast.qualityAdjusted": "Quality auto-adjusted to {{quality}}% for smaller file",
   "toast.fileError": "Failed to load file",
   "toast.fileTooLarge": "File size exceeds 20MB",
   "toast.unsupportedFormat": "Unsupported file format",

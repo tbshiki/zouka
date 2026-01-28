@@ -59,7 +59,6 @@
   "toast.convertSuccess": "変換が完了しました！",
   "toast.convertError": "変換に失敗しました",
   "toast.sizeIncreased": "注意: ファイルサイズが{{percent}}%増加しました",
-  "toast.qualityAdjusted": "品質を{{quality}}%に自動調整してサイズを削減しました",
   "toast.fileError": "ファイルの読み込みに失敗しました",
   "toast.fileTooLarge": "ファイルサイズが20MBを超えています",
   "toast.unsupportedFormat": "対応していないファイル形式です",

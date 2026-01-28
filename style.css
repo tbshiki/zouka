@@ -764,16 +764,10 @@ body.modal-open {
     border-color: var(--warning-border);
 }
 
-.estimate-delta--increase.estimate-delta--danger {
-    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.4), 0 8px 20px rgba(255, 152, 0, 0.25);
-    animation: pulseWarning 1s ease-in-out 3;
-}
-
 .estimate-delta--decrease {
     color: var(--success-text);
     background: linear-gradient(135deg, rgba(88, 227, 255, 0.18), rgba(130, 80, 223, 0.16));
     border-color: rgba(88, 227, 255, 0.45);
-    box-shadow: 0 10px 24px rgba(88, 227, 255, 0.18);
 }
 
 /* Warning Area */
