@@ -83,6 +83,55 @@ function validateNoncePlaceholders() {
   }
 }
 
+function injectAnalytics() {
+  const indexPath = path.join(DIST_DIR, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    return;
+  }
+
+  const gaId = process.env.GA_ID || process.env.GA_MEASUREMENT_ID || '';
+  const clarityId = process.env.CLARITY_ID || '';
+
+  let content = fs.readFileSync(indexPath, 'utf-8');
+
+  const gaSnippet = gaId
+    ? [
+        '<script async src="https://www.googletagmanager.com/gtag/js?id=' + gaId + '"></script>',
+        '<script nonce="__CSP_NONCE__">',
+        '  window.dataLayer = window.dataLayer || [];',
+        '  function gtag(){dataLayer.push(arguments);}',
+        '  gtag(\'js\', new Date());',
+        '  gtag(\'config\', \'' + gaId + '\');',
+        '</script>'
+      ].join('\n')
+    : '';
+
+  const claritySnippet = clarityId
+    ? [
+        '<script nonce="__CSP_NONCE__">',
+        '  (function(c,l,a,r,i,t,y){',
+        '    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};',
+        '    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;',
+        '    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);',
+        '  })(window, document, "clarity", "script", "' + clarityId + '");',
+        '</script>'
+      ].join('\n')
+    : '';
+
+  content = content
+    .replace('<!-- ANALYTICS:GA -->', gaSnippet)
+    .replace('<!-- ANALYTICS:CLARITY -->', claritySnippet);
+
+  fs.writeFileSync(indexPath, content);
+
+  if (!gaId) {
+    console.warn('⚠️  GA_ID is not set; GA snippet was not injected.');
+  }
+  if (!clarityId) {
+    console.warn('⚠️  CLARITY_ID is not set; Clarity snippet was not injected.');
+  }
+}
+
 function main() {
   console.log('📦 Build started');
   ensureCleanDir(DIST_DIR);
@@ -99,6 +148,7 @@ function main() {
     copyDirIfExists(src, dest, dir);
   }
 
+  injectAnalytics();
   validateNoncePlaceholders();
   console.log('✅ Build completed');
 }

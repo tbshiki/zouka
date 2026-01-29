@@ -19,6 +19,15 @@
    - **Build command**: `node scripts/build.js`
    - **Build output directory**: `dist`
 
+#### 1.1 Analytics 環境変数の設定（GA / Clarity）
+
+Cloudflare Pages の **Settings > Environment variables** に以下を追加します。
+
+- `GA_ID` : GA4 の測定 ID（例: `G-XXXXXXXXXX`）
+- `CLARITY_ID` : Microsoft Clarity のプロジェクト ID
+
+※ どちらか未設定の場合、そのスクリプトはビルド時に注入されません。
+
 #### 2. カスタムドメイン設定
 
 1. プロジェクト設定 > **Custom domains**
