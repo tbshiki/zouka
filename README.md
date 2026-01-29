@@ -1,6 +1,8 @@
-# zouka
+# zouka - 画像リサイズ＆形式変換ツール
 
 ブラウザ上で動作する、完全ローカル処理の画像リサイズ＆形式変換ツール
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 特徴
 
@@ -37,6 +39,24 @@
 - WebP（品質指定可能）
 - AVIF（品質指定可能、ブラウザ対応時のみ）
 
+## ローカル開発
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/tbshiki/zouka.git
+cd zouka
+
+# ローカルサーバーを起動
+npx serve dist
+
+```
+
+ブラウザで http://localhost:3000 にアクセス
+
+## デプロイ
+
+デプロイ手順は [DEPLOY.md](DEPLOY.md) を参照してください。
+
 ## セキュリティ・プライバシー
 
 このツールは以下の方法でプライバシーを保護しています：
@@ -45,42 +65,17 @@
 2. **Analytics は利用状況のみ** - Zaraz/Clarityで計測、画像データは送信しない
 3. **CSP による制限** - 翻訳JSONと分析の許可ドメインのみ通信可能
 
-## 技術スタック
-
-- HTML5
-- CSS3（CSS カスタムプロパティ、Grid、Flexbox）
-- Vanilla JavaScript（モジュールパターン）
-- File API / Blob API
-- Canvas API / createImageBitmap API
-- Google Fonts（Noto Sans JP、JetBrains Mono）
-- Cloudflare Pages Functions（CSP nonce 処理）
-
-## 開発
-
-翻訳ファイルは `locales/*.json` を読み込むため、ローカルサーバーでの起動を推奨します。
-
-```bash
-# ローカルサーバーで実行
-npx serve .
-
-# または Python
-python -m http.server 8000
-```
-
-## デプロイ
-
-Cloudflare Pages に静的ホスティング：
-
-1. GitHub リポジトリに接続
-2. ビルド設定なし（静的ファイルのみ）
-3. ルートディレクトリ: `/`（ルート直接配置）
-4. Functions で CSP nonce を動的に処理
-
-詳細は [DEPLOY.md](DEPLOY.md) を参照してください。
-
 ## ライセンス
 
 MIT License
+
+Copyright (c) 2026 tbshiki
+
+## バージョン履歴
+
+### v0.1.0 (2026-01-29)
+- 初回リリース
+
 
 ## 関連プロジェクト
 

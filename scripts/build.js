@@ -5,7 +5,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
@@ -15,7 +14,7 @@ const FILES_TO_COPY = [
   'style.css',
   'main.js',
   'ui.js',
-  'diff-engine.js',
+  'image-processor.js',
   'i18n.js',
   'manifest.json',
   'logo.png',
@@ -38,6 +37,14 @@ function copyFile(srcPath, destPath) {
   fs.copyFileSync(srcPath, destPath);
 }
 
+function copyFileIfExists(srcPath, destPath, label) {
+  if (!fs.existsSync(srcPath)) {
+    console.warn(`⚠️  Missing ${label}: ${srcPath}`);
+    return;
+  }
+  copyFile(srcPath, destPath);
+}
+
 function copyDir(srcDir, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
   const entries = fs.readdirSync(srcDir, { withFileTypes: true });
@@ -52,18 +59,27 @@ function copyDir(srcDir, destDir) {
   }
 }
 
-function runCspNonceReplacement() {
-  const result = spawnSync(
-    process.execPath,
-    [path.join(__dirname, 'replace-csp-nonce.js')],
-    {
-      stdio: 'inherit',
-      env: { ...process.env, OUTPUT_DIR: DIST_DIR }
-    }
-  );
+function copyDirIfExists(srcDir, destDir, label) {
+  if (!fs.existsSync(srcDir)) {
+    console.warn(`⚠️  Missing ${label}: ${srcDir}`);
+    return;
+  }
+  copyDir(srcDir, destDir);
+}
 
-  if (result.status !== 0) {
-    process.exit(result.status || 1);
+function validateNoncePlaceholders() {
+  const targets = [
+    path.join(DIST_DIR, 'index.html'),
+    path.join(DIST_DIR, '_headers')
+  ];
+  for (const target of targets) {
+    if (!fs.existsSync(target)) {
+      continue;
+    }
+    const content = fs.readFileSync(target, 'utf-8');
+    if (!content.includes('__CSP_NONCE__')) {
+      console.warn(`⚠️  CSP nonce placeholder missing: ${target}`);
+    }
   }
 }
 
@@ -74,16 +90,16 @@ function main() {
   for (const file of FILES_TO_COPY) {
     const src = path.join(ROOT_DIR, file);
     const dest = path.join(DIST_DIR, file);
-    copyFile(src, dest);
+    copyFileIfExists(src, dest, file);
   }
 
   for (const dir of DIRS_TO_COPY) {
     const src = path.join(ROOT_DIR, dir);
     const dest = path.join(DIST_DIR, dir);
-    copyDir(src, dest);
+    copyDirIfExists(src, dest, dir);
   }
 
-  runCspNonceReplacement();
+  validateNoncePlaceholders();
   console.log('✅ Build completed');
 }
 

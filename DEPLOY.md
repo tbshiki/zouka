@@ -16,8 +16,8 @@
 3. GitHub リポジトリ `tbshiki/zouka` を選択
 4. ビルド設定:
    - **Framework preset**: `None`
-   - **Build command**: （空欄）
-   - **Build output directory**: `/`（ルート）
+   - **Build command**: `node scripts/build.js`
+   - **Build output directory**: `dist`
 
 #### 2. カスタムドメイン設定
 
@@ -33,6 +33,8 @@
 - リクエストごとにランダムな nonce を生成
 - HTML 内の `__CSP_NONCE__` プレースホルダーを置換
 - `_headers` ファイルの CSP ヘッダー内の nonce も置換
+
+※ `scripts/replace-csp-nonce.js` は静的配信用の置換ツールです。Functions を使う構成ではビルドで実行しません。
 
 #### 4. ファイル構成確認
 
@@ -54,6 +56,9 @@ zouka/
 ├── LICENSE             # ライセンスファイル
 ├── README.md           # プロジェクト説明
 ├── DEPLOY.md           # このファイル
+├── scripts/
+│   ├── build.js         # dist/ を生成するビルドスクリプト
+│   └── replace-csp-nonce.js # 静的配信用のnonce置換（任意）
 └── functions/
     └── _middleware.js  # CSP nonce 処理
 ```
@@ -73,19 +78,10 @@ curl -I https://zouka.taptoclicks.com/
 ```
 
 以下のヘッダーが返されることを確認：
-- `Content-Security-Policy` に `connect-src 'self' https://www.clarity.ms https://c.clarity.ms https://cloudflareinsights.com` が含まれる
+- `Content-Security-Policy` に `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clarity.ms https://cloudflareinsights.com` が含まれる
 - `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
 
-#### 3. PWA 確認
-
-- [ ] Chrome DevTools > Application > Manifest が正常
-- [ ] アイコンが表示される
-
-#### 4. SEO 確認
-
-- [ ] https://zouka.taptoclicks.com/sitemap.xml にアクセスできる
-- [ ] robots.txt が正常
 
 ### トラブルシューティング
 
@@ -104,24 +100,12 @@ curl -I https://zouka.taptoclicks.com/
 ### ローカル開発
 
 ```bash
+# dist/ を生成
+node scripts/build.js
+
 # 簡易サーバーで動作確認
-npx serve .
+npx serve dist
 
 # または Wrangler（Cloudflare CLI）で Functions も含めてテスト
-npx wrangler pages dev .
+npx wrangler pages dev dist
 ```
-
-### 更新手順
-
-1. ローカルで変更を加える
-2. `git commit` & `git push`
-3. Cloudflare Pages が自動でデプロイ
-4. デプロイ完了を確認（通常1-2分）
-
----
-
-## 関連リンク
-
-- [Cloudflare Pages ドキュメント](https://developers.cloudflare.com/pages/)
-- [CSP ヘッダーリファレンス](https://developer.mozilla.org/ja/docs/Web/HTTP/CSP)
-- [zouka GitHub リポジトリ](https://github.com/tbshiki/zouka)
