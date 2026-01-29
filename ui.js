@@ -114,6 +114,7 @@ const UI = (function () {
       warningArea: document.getElementById('warning-area'),
       warningSizeIncrease: document.getElementById('warning-size-increase'),
       warningAspectChange: document.getElementById('warning-aspect-change'),
+      warningAspectText: document.querySelector('#warning-aspect-change [data-i18n]'),
       warningAnimatedGif: document.getElementById('warning-animated-gif'),
 
       // Toast
@@ -573,9 +574,11 @@ const UI = (function () {
       }
     }
     if (showAspectWarning) {
-      elements.warningAspectChange.setAttribute('data-i18n', aspectMessageKey);
-      if (typeof I18n !== 'undefined') {
-        elements.warningAspectChange.textContent = I18n.t(aspectMessageKey);
+      if (elements.warningAspectText) {
+        elements.warningAspectText.setAttribute('data-i18n', aspectMessageKey);
+        if (typeof I18n !== 'undefined') {
+          elements.warningAspectText.textContent = I18n.t(aspectMessageKey);
+        }
       }
     }
     elements.warningAspectChange.classList.toggle('hidden', !showAspectWarning);
@@ -731,11 +734,13 @@ const UI = (function () {
   function showProcessing() {
     elements.processingOverlay.classList.remove('hidden');
     elements.btnConvert.disabled = true;
+    elements.btnReset.disabled = true;
   }
 
   function hideProcessing() {
     elements.processingOverlay.classList.add('hidden');
     elements.btnConvert.disabled = false;
+    elements.btnReset.disabled = false;
   }
 
   // ========== リセット ==========
@@ -791,6 +796,11 @@ const UI = (function () {
     elements.btnLockRatio.classList.add('active');
     elements.btnLockRatio.setAttribute('aria-pressed', 'true');
     elements.btnLockRatio.querySelector('.lock-icon').textContent = '🔗';
+
+    // アップロードエリアへフォーカスを戻す
+    if (elements.dropZone) {
+      elements.dropZone.focus();
+    }
   }
 
   // ========== テーマ ==========

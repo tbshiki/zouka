@@ -305,6 +305,7 @@ body.modal-open {
     transition: all var(--transition-fast);
     background: var(--bg-secondary);
     min-height: auto;
+    scroll-margin-top: 88px;
 }
 
 .drop-zone:hover,
@@ -1367,15 +1368,25 @@ input:focus-visible,
 /* Responsive */
 @media (max-width: 768px) {
     .header {
-        padding: var(--space-md);
-        flex-direction: column;
-        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-sm);
     }
 
     .header-content {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row;
+        align-items: center;
         gap: var(--space-sm);
+    }
+
+    .tagline {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+
+    .header-actions {
+        gap: var(--space-xs);
     }
 
     .main-container {
