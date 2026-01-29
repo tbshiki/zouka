@@ -1,5 +1,9 @@
 {
   "skip.link": "Skip to main content",
+  "document.title": "zouka - Image Resize & Convert Tool",
+  "meta.description": "zouka - A fully local image resize and format conversion tool. Process images safely in your browser without sending data to any server.",
+  "meta.og.title": "zouka - Image Resize & Convert Tool",
+  "meta.twitter.title": "zouka - Image Resize & Convert Tool",
   "header.tagline": "Image Resize & Convert Tool",
   "header.lang.title": "Switch language",
   "header.lang.aria": "Switch language",
@@ -109,5 +113,13 @@
   "privacy.section6.content": "For inquiries about this tool and bug reports, please use <a href=\"https://github.com/tbshiki/zouka/issues\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Issues</a>.",
   "privacy.section7.title": "7. Amendments",
   "privacy.section7.content": "This privacy policy may be amended as necessary. Significant changes will be announced on this tool.",
-  "privacy.lastUpdated": "Last updated: January 29, 2026"
+  "privacy.lastUpdated": "Last updated: January 29, 2026",
+  "structured.description": "A fully local image resize and format conversion tool. Process images safely in your browser without sending data to any server.",
+  "structured.featureList": [
+    "Image resize",
+    "Format conversion",
+    "AVIF/WebP/PNG/JPEG support",
+    "Fully local processing",
+    "Privacy protection"
+  ]
 }

@@ -157,6 +157,55 @@ const I18n = (function () {
 
     // html lang 属性
     document.documentElement.lang = currentLang;
+
+    updateStructuredData();
+  }
+
+  /**
+   * 構造化データを言語に合わせて更新
+   */
+  function updateStructuredData() {
+    const script = document.getElementById('structured-data');
+    if (!script) {
+      return;
+    }
+
+    const fallbackDescription =
+      'A fully local image resize and format conversion tool. Process images safely in your browser without sending data to any server.';
+    const fallbackFeatures = [
+      'Image resize',
+      'Format conversion',
+      'AVIF/WebP/PNG/JPEG support',
+      'Fully local processing',
+      'Privacy protection'
+    ];
+
+    const description = t('structured.description');
+    const featureListValue = t('structured.featureList');
+    const featureList = Array.isArray(featureListValue)
+      ? featureListValue
+      : (typeof featureListValue === 'string' && featureListValue !== 'structured.featureList'
+        ? featureListValue.split('|').map(item => item.trim()).filter(Boolean)
+        : fallbackFeatures);
+
+    const data = {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'zouka',
+      description: description === 'structured.description' ? fallbackDescription : description,
+      url: 'https://zouka.taptoclicks.com/',
+      applicationCategory: 'UtilityApplication',
+      operatingSystem: 'Any',
+      browserRequirements: 'Requires JavaScript',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD'
+      },
+      featureList
+    };
+
+    script.textContent = JSON.stringify(data, null, 2);
   }
 
   /**
