@@ -113,7 +113,7 @@ const UI = (function () {
       // Warnings
       warningArea: document.getElementById('warning-area'),
       warningSizeIncrease: document.getElementById('warning-size-increase'),
-      warningAspectFlip: document.getElementById('warning-aspect-flip'),
+      warningAspectChange: document.getElementById('warning-aspect-change'),
       warningAnimatedGif: document.getElementById('warning-animated-gif'),
 
       // Toast
@@ -551,20 +551,35 @@ const UI = (function () {
     if (showSizeWarning) hasAnyWarning = true;
 
     // 縦横比逆転警告
-    let showAspectFlipWarning = false;
+    let showAspectWarning = false;
+    let aspectMessageKey = 'warning.aspectChange';
     if (state.originalInfo && newWidth > 0 && newHeight > 0) {
       const originalIsLandscape = state.originalInfo.width > state.originalInfo.height;
       const originalIsPortrait = state.originalInfo.width < state.originalInfo.height;
       const newIsLandscape = newWidth > newHeight;
       const newIsPortrait = newWidth < newHeight;
+      const originalRatio = state.originalInfo.width / state.originalInfo.height;
+      const newRatio = newWidth / newHeight;
+      const aspectChanged = Math.abs(newRatio - originalRatio) > 0.01;
+      const mode = getResizeMode();
 
       // 横長→縦長、または縦長→横長になる場合
       if ((originalIsLandscape && newIsPortrait) || (originalIsPortrait && newIsLandscape)) {
-        showAspectFlipWarning = true;
+        showAspectWarning = true;
+        aspectMessageKey = 'warning.aspectChangeFlip';
+      } else if (mode === 'preset' && aspectChanged) {
+        showAspectWarning = true;
+        aspectMessageKey = 'warning.aspectChange';
       }
     }
-    elements.warningAspectFlip.classList.toggle('hidden', !showAspectFlipWarning);
-    if (showAspectFlipWarning) hasAnyWarning = true;
+    if (showAspectWarning) {
+      elements.warningAspectChange.setAttribute('data-i18n', aspectMessageKey);
+      if (typeof I18n !== 'undefined') {
+        elements.warningAspectChange.textContent = I18n.t(aspectMessageKey);
+      }
+    }
+    elements.warningAspectChange.classList.toggle('hidden', !showAspectWarning);
+    if (showAspectWarning) hasAnyWarning = true;
 
     // アニメーションGIF警告
     const showAnimatedGifWarning = !!state.originalInfo?.isAnimatedGif;
@@ -748,7 +763,7 @@ const UI = (function () {
     // 警告エリアをクリア
     elements.warningArea.classList.add('hidden');
     elements.warningSizeIncrease.classList.add('hidden');
-    elements.warningAspectFlip.classList.add('hidden');
+    elements.warningAspectChange.classList.add('hidden');
     resetEstimateDelta();
 
     // 設定をデフォルトに

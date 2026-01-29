@@ -7,7 +7,7 @@
 ## 特徴
 
 - 🔒 **完全ローカル処理** - 画像は一切サーバーに送信されません
-- 🚫 **外部送信を制限** - Analytics（Zaraz/Clarity）以外の通信をCSPで制限、画像は送信しません
+- 🚫 **外部送信を制限** - Analytics（Google Analytics / Microsoft Clarity）以外の通信をCSPで制限、画像は送信しません
 - 🖼️ **多形式対応** - JPEG, PNG, WebP, AVIF に対応
 - 📐 **柔軟なリサイズ** - カスタムサイズ、長辺指定、プリセット比率
 - 🎨 **品質調整** - 出力形式ごとの品質設定、背景色指定
@@ -46,6 +46,9 @@
 git clone https://github.com/tbshiki/zouka.git
 cd zouka
 
+# ビルド（dist/ を生成）
+node scripts/build.js
+
 # ローカルサーバーを起動
 npx serve dist
 
@@ -62,7 +65,7 @@ npx serve dist
 このツールは以下の方法でプライバシーを保護しています：
 
 1. **ローカル処理のみ** - すべての処理はブラウザ内で完結
-2. **Analytics は利用状況のみ** - Zaraz/Clarityで計測、画像データは送信しない
+2. **Analytics は利用状況のみ** - Google Analytics / Microsoft Clarityで計測、画像データは送信しない
 3. **CSP による制限** - 翻訳JSONと分析の許可ドメインのみ通信可能
 
 ## ライセンス
@@ -75,6 +78,9 @@ Copyright (c) 2026 tbshiki
 
 ### v0.1.0 (2026-01-29)
 - 初回リリース
+- 画像リサイズ（カスタム/長辺/プリセット比率）と形式変換を提供
+- JPEG/PNG/WebP/AVIF に対応（品質指定可）
+- 変換前のサイズ見積もりとダークモード、多言語対応を搭載
 
 
 ## 関連プロジェクト
