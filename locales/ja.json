@@ -91,11 +91,11 @@
   "privacy.section3.clarity.label": "Microsoft Clarity",
   "privacy.section3.clarity.body": "クリックやスクロールなどの操作パターンを匿名で収集します",
   "privacy.section3.note.prefix": "これらのツールはクッキーを使用する場合がありますが、",
-  "privacy.section3.note.emphasis": "画像入力の内容が収集されることはありません",
+  "privacy.section3.note.emphasis": "入力画像データが収集されることはありません",
   "privacy.section3.note.suffix": "。",
   "privacy.section3.advanced": "クッキーは、ユーザー行動の時系列やファネルなどの高度なレポート作成にも利用される場合があります。",
   "privacy.section3.notice.title": "⚠️ Microsoft Clarityのセッション記録について",
-  "privacy.section3.notice.content1": "本ツールでは画像の送信は行っておりませんが、Microsoft Clarity にはユーザーの操作を録画する機能があります。本ツールでは入力エリアをマスク対象として設定していますが、技術的な制約により完全な除外を保証することはできません。",
+  "privacy.section3.notice.content1": "本ツールでは画像の送信は行っておりませんが、Microsoft Clarity にはユーザーの操作を録画する機能があります。入力画像や結果画像のプレビューをマスク対象として設定していますが、技術的な制約により完全な除外を保証することはできません。",
   "privacy.section3.notice.content2": "機密性の高い画像を扱う場合は、ブラウザの設定でサードパーティCookieをブロックするか、Do Not Track（DNT）を有効にすることをご検討ください。",
   "privacy.section4.title": "4. Cookieについて",
   "privacy.section4.intro": "本ツールでは以下の目的でCookieまたはローカルストレージを使用します。",
@@ -108,5 +108,5 @@
   "privacy.section6.content": "このツールに関するお問い合わせやバグ報告は、<a href=\"https://github.com/tbshiki/zouka/issues\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Issues</a>よりお願いします。",
   "privacy.section7.title": "7. 改定",
   "privacy.section7.content": "このプライバシーポリシーは必要に応じて改定されることがあります。重要な変更は本ツール上でお知らせします。",
-  "privacy.lastUpdated": "最終更新日: 2026年1月24日"
+  "privacy.lastUpdated": "最終更新日: 2026年1月29日"
 }

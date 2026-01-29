@@ -91,11 +91,11 @@
   "privacy.section3.clarity.label": "Microsoft Clarity",
   "privacy.section3.clarity.body": "Collects anonymized user interaction patterns (clicks, scrolls, etc.)",
   "privacy.section3.note.prefix": "These tools may use cookies, but ",
-  "privacy.section3.note.emphasis": "the content of your image input is never collected",
+  "privacy.section3.note.emphasis": "your input image data is never collected",
   "privacy.section3.note.suffix": ".",
   "privacy.section3.advanced": "Cookies may also be used to create advanced monitoring reports based on tracked events (such as user timelines or funnel reports).",
   "privacy.section3.notice.title": "⚠️ About Microsoft Clarity Session Recording",
-  "privacy.section3.notice.content1": "Microsoft Clarity has a feature that records user interactions. While we have configured input areas to be masked, we cannot guarantee complete exclusion due to technical limitations.",
+  "privacy.section3.notice.content1": "Microsoft Clarity has a feature that records user interactions. The image preview and conversion result areas are masked, but complete exclusion cannot be guaranteed due to technical limitations.",
   "privacy.section3.notice.content2": "If you handle sensitive images, consider blocking third-party cookies in your browser settings or enabling Do Not Track (DNT).",
   "privacy.section4.title": "4. About Cookies",
   "privacy.section4.intro": "This tool uses cookies or local storage for the following purposes.",
@@ -108,5 +108,5 @@
   "privacy.section6.content": "For inquiries about this tool and bug reports, please use <a href=\"https://github.com/tbshiki/zouka/issues\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Issues</a>.",
   "privacy.section7.title": "7. Amendments",
   "privacy.section7.content": "This privacy policy may be amended as necessary. Significant changes will be announced on this tool.",
-  "privacy.lastUpdated": "Last updated: January 24, 2026"
+  "privacy.lastUpdated": "Last updated: January 29, 2026"
 }
