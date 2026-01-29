@@ -1,5 +1,9 @@
 {
   "skip.link": "メインコンテンツへスキップ",
+  "document.title": "zouka - 画像リサイズ＆変換ツール",
+  "meta.description": "zouka - ブラウザ上で画像をリサイズ・形式変換する完全ローカルツール。画像データはサーバーに送信されません。",
+  "meta.og.title": "zouka - 画像リサイズ＆変換ツール",
+  "meta.twitter.title": "zouka - 画像リサイズ＆変換ツール",
   "header.tagline": "画像リサイズ＆変換ツール",
   "header.lang.title": "言語切替",
   "header.lang.aria": "言語を切り替え",
@@ -109,5 +113,13 @@
   "privacy.section6.content": "このツールに関するお問い合わせやバグ報告は、<a href=\"https://github.com/tbshiki/zouka/issues\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Issues</a>よりお願いします。",
   "privacy.section7.title": "7. 改定",
   "privacy.section7.content": "このプライバシーポリシーは必要に応じて改定されることがあります。重要な変更は本ツール上でお知らせします。",
-  "privacy.lastUpdated": "最終更新日: 2026年1月29日"
+  "privacy.lastUpdated": "最終更新日: 2026年1月29日",
+  "structured.description": "ブラウザ上で画像をリサイズ・形式変換する完全ローカルツールです。画像データはサーバーに送信されません。",
+  "structured.featureList": [
+    "画像リサイズ",
+    "形式変換",
+    "AVIF/WebP/PNG/JPEG対応",
+    "完全ローカル処理",
+    "プライバシー保護"
+  ]
 }

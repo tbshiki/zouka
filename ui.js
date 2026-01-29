@@ -812,7 +812,14 @@ const UI = (function () {
 
     // アップロードエリアへフォーカスを戻す
     if (elements.dropZone) {
-      elements.dropZone.focus();
+      elements.dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.requestAnimationFrame(() => {
+        try {
+          elements.dropZone.focus({ preventScroll: true });
+        } catch (error) {
+          elements.dropZone.focus();
+        }
+      });
     }
   }
 
