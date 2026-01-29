@@ -213,8 +213,13 @@ const ImageProcessor = (function () {
     try {
       bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
     } catch (error) {
-      // imageOrientation未対応ブラウザ向けのフォールバック
-      bitmap = await createImageBitmap(file);
+      try {
+        // imageOrientation未対応ブラウザ向けのフォールバック
+        bitmap = await createImageBitmap(file);
+      } catch (fallbackError) {
+        // createImageBitmapが失敗する環境向けのフォールバック
+        bitmap = await loadImageElementFromFile(file);
+      }
     }
     const mimeType = resolveMimeType(file);
 
@@ -240,6 +245,27 @@ const ImageProcessor = (function () {
     };
 
     return { bitmap, info };
+  }
+
+  /**
+   * Image 要素で読み込むフォールバック
+   * @param {File} file
+   * @returns {Promise<HTMLImageElement>}
+   */
+  function loadImageElementFromFile(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image'));
+      };
+      img.src = url;
+    });
   }
 
   /**

@@ -243,7 +243,7 @@ const UI = (function () {
 
     try {
       // 古いリソースを解放
-      if (state.originalBitmap) {
+      if (state.originalBitmap && typeof state.originalBitmap.close === 'function') {
         state.originalBitmap.close();
       }
       if (state.previewUrl && state.previewUrl.startsWith('blob:')) {
@@ -742,7 +742,7 @@ const UI = (function () {
 
   function handleReset() {
     // 状態リセット
-    if (state.originalBitmap) {
+    if (state.originalBitmap && typeof state.originalBitmap.close === 'function') {
       state.originalBitmap.close();
     }
     if (state.previewUrl && state.previewUrl.startsWith('blob:')) {
