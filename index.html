@@ -146,7 +146,7 @@
                     </div>
                 </div>
                 <div class="preview-container">
-                    <img id="preview-image" class="preview-image" alt="Preview of selected image" data-i18n="preview.alt" data-i18n-attr="alt">
+                    <img id="preview-image" class="preview-image" alt="Preview of selected image" data-i18n="preview.alt" data-i18n-attr="alt" data-clarity-mask="true">
                 </div>
             </div>
         </section>
@@ -304,9 +304,13 @@
                     <span class="warning-icon" aria-hidden="true">📈</span>
                     <span data-i18n="warning.sizeIncrease">File size may increase with current settings.</span>
                 </div>
-                <div id="warning-aspect-flip" class="warning-item hidden">
+                <div id="warning-aspect-change" class="warning-item hidden">
                     <span class="warning-icon" aria-hidden="true">🔄</span>
-                    <span data-i18n="warning.aspectFlip">Aspect ratio will be flipped (portrait ↔ landscape).</span>
+                    <span data-i18n="warning.aspectChange">Aspect ratio will change.</span>
+                </div>
+                <div id="warning-animated-gif" class="warning-item hidden">
+                    <span class="warning-icon" aria-hidden="true">🎞️</span>
+                    <span data-i18n="warning.animatedGif">Animated GIFs will be converted using the first frame only.</span>
                 </div>
             </div>
 
@@ -334,7 +338,7 @@
                         <span id="result-original-ext" class="result-ext">-</span>
                     </h3>
                     <div class="result-preview">
-                        <img id="result-original-img" class="result-image" alt="Original image" data-i18n="result.original" data-i18n-attr="alt">
+                        <img id="result-original-img" class="result-image" alt="Original image" data-i18n="result.original" data-i18n-attr="alt" data-clarity-mask="true">
                     </div>
                     <div class="result-info">
                         <span id="result-original-size" class="result-size">-</span>
@@ -348,7 +352,7 @@
                         <span id="result-converted-ext" class="result-ext">-</span>
                     </h3>
                     <div class="result-preview">
-                        <img id="result-converted-img" class="result-image" alt="Converted image" data-i18n="result.converted" data-i18n-attr="alt">
+                        <img id="result-converted-img" class="result-image" alt="Converted image" data-i18n="result.converted" data-i18n-attr="alt" data-clarity-mask="true">
                     </div>
                     <div class="result-info">
                         <span id="result-converted-size" class="result-size">-</span>
