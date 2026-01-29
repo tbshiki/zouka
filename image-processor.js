@@ -531,7 +531,7 @@ const ImageProcessor = (function () {
    */
   function generateFilename(originalName, width, height, format) {
     const baseName = originalName.replace(/\.[^.]+$/, '');
-    const extension = format.split('/')[1];
+    const extension = format === 'image/jpeg' ? 'jpg' : format.split('/')[1];
     return `${baseName}_${width}x${height}.${extension}`;
   }
 

@@ -27,6 +27,21 @@ const UI = (function () {
   let focusTrapHandler = null;
 
   /**
+   * 翻訳取得（キー未定義時はフォールバック）
+   * @param {string} key
+   * @param {string} fallback
+   * @param {Object} params
+   * @returns {string}
+   */
+  function tOr(key, fallback = '', params = {}) {
+    if (typeof I18n === 'undefined') {
+      return fallback;
+    }
+    const value = I18n.t(key, params);
+    return value === key ? fallback : value;
+  }
+
+  /**
    * DOM要素を取得してキャッシュ
    */
   function cacheElements() {
@@ -238,7 +253,7 @@ const UI = (function () {
     // バリデーション
     const validation = ImageProcessor.validateFile(file);
     if (!validation.valid) {
-      showToast(I18n.t(validation.errorKey), 'error');
+      showToast(tOr(validation.errorKey, 'Invalid file'), 'error');
       return;
     }
 
@@ -276,7 +291,7 @@ const UI = (function () {
 
     } catch (error) {
       console.error('Error loading image:', error);
-      showToast(I18n.t('toast.fileError'), 'error');
+      showToast(tOr('toast.fileError', 'Failed to load image'), 'error');
     }
   }
 
@@ -485,8 +500,7 @@ const UI = (function () {
   }
 
   function resetEstimateDelta() {
-    const placeholder = (typeof I18n !== 'undefined' && I18n.t('output.change.placeholder')) ||
-      'Select an image to see size change';
+    const placeholder = tOr('output.change.placeholder', 'Select an image to see size change');
     setEstimateDeltaState('neutral', '↔', placeholder);
   }
 
@@ -507,21 +521,19 @@ const UI = (function () {
     const percent = Math.abs(diff) / originalSize * 100;
 
     if (percent < 0.5) {
-      const sameText = (typeof I18n !== 'undefined' && I18n.t('output.change.same')) || 'About the same size';
+      const sameText = tOr('output.change.same', 'About the same size');
       setEstimateDeltaState('neutral', '↔', sameText);
       return;
     }
 
     const percentText = percent.toFixed(1);
     if (diff < 0) {
-      const smallerText = (typeof I18n !== 'undefined' && I18n.t('output.change.smaller', { percent: percentText })) ||
-        `Smaller by ${percentText}%`;
+      const smallerText = tOr('output.change.smaller', `Smaller by ${percentText}%`, { percent: percentText });
       setEstimateDeltaState('decrease', '⬇', smallerText);
       return;
     }
 
-    const largerText = (typeof I18n !== 'undefined' && I18n.t('output.change.larger', { percent: percentText })) ||
-      `Larger by ${percentText}%`;
+    const largerText = tOr('output.change.larger', `Larger by ${percentText}%`, { percent: percentText });
     setEstimateDeltaState('increase', '⚠️', largerText);
   }
 
@@ -576,8 +588,9 @@ const UI = (function () {
     if (showAspectWarning) {
       if (elements.warningAspectText) {
         elements.warningAspectText.setAttribute('data-i18n', aspectMessageKey);
-        if (typeof I18n !== 'undefined') {
-          elements.warningAspectText.textContent = I18n.t(aspectMessageKey);
+        const translated = tOr(aspectMessageKey, '');
+        if (translated) {
+          elements.warningAspectText.textContent = translated;
         }
       }
     }
@@ -644,14 +657,14 @@ const UI = (function () {
       if (result.size > state.originalInfo.fileSize) {
         // それでもサイズが増加した場合（PNG変換時など）
         const increase = Math.round((result.size / state.originalInfo.fileSize - 1) * 100);
-        showToast(I18n.t('toast.sizeIncreased', { percent: increase }) || `File size increased by ${increase}%`, 'warning');
+        showToast(tOr('toast.sizeIncreased', `File size increased by ${increase}%`, { percent: increase }), 'warning');
       } else {
-        showToast(I18n.t('toast.convertSuccess') || 'Conversion complete!', 'success');
+        showToast(tOr('toast.convertSuccess', 'Conversion complete!'), 'success');
       }
 
     } catch (error) {
       console.error('Conversion error:', error);
-      showToast(I18n.t('toast.convertError') || 'Conversion failed', 'error');
+      showToast(tOr('toast.convertError', 'Conversion failed'), 'error');
     } finally {
       state.isProcessing = false;
       hideProcessing();
