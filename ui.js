@@ -134,6 +134,8 @@ const UI = (function () {
       warningAnimatedGif: document.getElementById('warning-animated-gif'),
       warningFormatUnsupported: document.getElementById('warning-format-unsupported'),
       warningFormatUnsupportedText: document.getElementById('warning-format-unsupported-text'),
+      warningWebpIos: document.getElementById('warning-webp-ios'),
+      warningWebpIosText: document.getElementById('warning-webp-ios-text'),
       warningFormatFallback: document.getElementById('warning-format-fallback'),
       warningFormatText: document.getElementById('warning-format-text'),
 
@@ -670,6 +672,27 @@ const UI = (function () {
     elements.warningFormatUnsupported?.classList.toggle('hidden', !showFormatUnsupportedWarning);
     if (showFormatUnsupportedWarning) hasAnyWarning = true;
 
+    // iOS ChromeのWebP圧縮注意
+    let showWebpIosWarning = false;
+    if (
+      state.originalInfo &&
+      !showFormatFallbackWarning &&
+      !showFormatUnsupportedWarning &&
+      normalizeMimeType(selectedFormat) === 'image/webp' &&
+      isIOSChrome()
+    ) {
+      const warningMessage = tOr(
+        'warning.webpIosChrome',
+        'On iOS Chrome, WebP may end up similar in size to PNG.'
+      );
+      if (elements.warningWebpIosText) {
+        elements.warningWebpIosText.textContent = warningMessage;
+      }
+      showWebpIosWarning = true;
+    }
+    elements.warningWebpIos?.classList.toggle('hidden', !showWebpIosWarning);
+    if (showWebpIosWarning) hasAnyWarning = true;
+
     // 警告エリア全体の表示/非表示
     elements.warningArea.classList.toggle('hidden', !hasAnyWarning);
   }
@@ -852,6 +875,14 @@ const UI = (function () {
     return normalized === 'image/jpg' ? 'image/jpeg' : normalized;
   }
 
+  function isIOSChrome() {
+    if (typeof navigator === 'undefined') return false;
+    const ua = navigator.userAgent || '';
+    const isIOS = /iP(hone|od|ad)/.test(ua) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return isIOS && /CriOS/.test(ua);
+  }
+
   function getFormatLabel(mimeType) {
     const normalized = normalizeMimeType(mimeType);
     const map = {
@@ -920,6 +951,7 @@ const UI = (function () {
     elements.warningSizeIncrease.classList.add('hidden');
     elements.warningAspectChange.classList.add('hidden');
     elements.warningFormatUnsupported?.classList.add('hidden');
+    elements.warningWebpIos?.classList.add('hidden');
     elements.warningFormatFallback?.classList.add('hidden');
     resetEstimateDelta();
 

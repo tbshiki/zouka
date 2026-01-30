@@ -63,6 +63,7 @@
   "warning.aspectChangeFlip": "縦横比が変更され、縦横比が逆転します（縦長 ↔ 横長）。",
   "warning.animatedGif": "アニメーションGIFは1フレーム目のみで変換されます。",
   "warning.formatUnsupported": "このブラウザでは{{format}}へのエンコードに対応していない可能性があります。出力はPNGでダウンロードされる場合があります。",
+  "warning.webpIosChrome": "iOS版ChromeではWebPの圧縮効果が弱く、PNGと同程度のサイズになる場合があります。",
   "warning.formatFallback": "このブラウザは{{requested}}へのエンコードに対応していないため、出力は{{actual}}でダウンロードされます。",
   "toast.convertSuccess": "変換が完了しました！",
   "toast.convertError": "変換に失敗しました",

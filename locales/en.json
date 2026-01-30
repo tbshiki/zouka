@@ -63,6 +63,7 @@
   "warning.aspectChangeFlip": "Aspect ratio will change and flip (portrait ↔ landscape).",
   "warning.animatedGif": "Animated GIFs will be converted using the first frame only.",
   "warning.formatUnsupported": "This browser cannot encode {{format}}. Output may be downloaded as PNG.",
+  "warning.webpIosChrome": "On iOS Chrome, WebP compression may be ineffective, resulting in PNG-like sizes.",
   "warning.formatFallback": "Selected format ({{requested}}) isn't supported, so output will be downloaded as {{actual}}.",
   "toast.convertSuccess": "Conversion complete!",
   "toast.convertError": "Conversion failed",

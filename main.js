@@ -10,7 +10,7 @@
    * アプリケーション初期化
    */
   async function initApp() {
-    console.log('🖼️ zouka v0.1.0 - Image Resize & Convert Tool');
+    console.log('🖼️ zouka v0.2.0 - Image Resize & Convert Tool');
     console.log('🔒 完全ローカル処理 - サーバー通信なし');
     console.log('📊 Analytics via GA/Clarity - 画像データは送信しません');
 
