@@ -40,7 +40,8 @@ const I18n = (function () {
       return loadPromises[lang];
     }
 
-    loadPromises[lang] = fetch(`locales/${lang}.json`, {
+    const localePath = resolveLocalePath(lang);
+    loadPromises[lang] = fetch(localePath, {
       method: 'GET',
       cache: 'no-store',
       credentials: 'omit',
@@ -160,6 +161,21 @@ const I18n = (function () {
     document.documentElement.lang = currentLang;
 
     updateStructuredData();
+  }
+
+  /**
+   * 変換済みのロケールパスを取得（ビルド時ハッシュ対応）
+   * @param {string} lang
+   * @returns {string}
+   */
+  function resolveLocalePath(lang) {
+    if (typeof window !== 'undefined' && window.__ASSET_MANIFEST__) {
+      const mapped = window.__ASSET_MANIFEST__.locales?.[lang];
+      if (mapped) {
+        return mapped;
+      }
+    }
+    return `locales/${lang}.json`;
   }
 
   /**
