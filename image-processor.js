@@ -16,6 +16,8 @@ const ImageProcessor = (function () {
 
   // AVIF対応フラグ
   let avifSupported = false;
+  // WebP対応フラグ
+  let webpSupported = false;
 
   /**
    * AVIF対応をチェック
@@ -34,11 +36,35 @@ const ImageProcessor = (function () {
   }
 
   /**
+   * WebP対応をチェック
+   * @returns {Promise<boolean>}
+   */
+  async function checkWebPSupport() {
+    return new Promise(resolve => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      canvas.toBlob(blob => {
+        webpSupported = !!blob;
+        resolve(webpSupported);
+      }, 'image/webp', 0.5);
+    });
+  }
+
+  /**
    * AVIF対応状態を取得
    * @returns {boolean}
    */
   function isAVIFSupported() {
     return avifSupported;
+  }
+
+  /**
+   * WebP対応状態を取得
+   * @returns {boolean}
+   */
+  function isWebPSupported() {
+    return webpSupported;
   }
 
   /**
@@ -72,7 +98,9 @@ const ImageProcessor = (function () {
    * @returns {string}
    */
   function normalizeMimeType(type) {
-    return typeof type === 'string' ? type.toLowerCase().trim() : '';
+    if (typeof type !== 'string') return '';
+    const normalized = type.toLowerCase().trim();
+    return normalized === 'image/jpg' ? 'image/jpeg' : normalized;
   }
 
   /**
@@ -508,6 +536,7 @@ const ImageProcessor = (function () {
           return;
         }
 
+        const actualType = normalizeMimeType(blob.type) || normalizeMimeType(format) || format;
         const url = URL.createObjectURL(blob);
         resolve({
           blob,
@@ -515,7 +544,8 @@ const ImageProcessor = (function () {
           size: blob.size,
           formattedSize: formatFileSize(blob.size),
           width,
-          height
+          height,
+          mimeType: actualType
         });
       }, format, quality);
     });
@@ -549,7 +579,9 @@ const ImageProcessor = (function () {
   return {
     CONFIG,
     checkAVIFSupport,
+    checkWebPSupport,
     isAVIFSupported,
+    isWebPSupported,
     formatFileSize,
     calculateAspectRatio,
     validateFile,
