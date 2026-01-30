@@ -56,7 +56,7 @@
         "featureList": [
             "Image resize",
             "Format conversion",
-            "AVIF/WebP/PNG/JPEG support",
+            "WebP/PNG/JPEG support",
             "Fully local processing",
             "Privacy protection"
         ]
@@ -95,17 +95,11 @@
                 <p class="intro-text" data-i18n="intro.description">Resize and convert images right in your browser. Choose your settings below, then drop or select an image to convert.</p>
                 <ul class="feature-list">
                     <li data-i18n="intro.feature1">🔒 100% local processing - images never leave your device</li>
-                    <li data-i18n="intro.feature2">🖼️ Support for JPEG, PNG, WebP, GIF, AVIF</li>
+                    <li data-i18n="intro.feature2">🖼️ Support for JPEG, PNG, WebP, GIF</li>
                     <li data-i18n="intro.feature3">📐 Resize by custom size, long edge, or preset ratios</li>
                 </ul>
             </div>
         </section>
-
-        <!-- Browser Compatibility Notice -->
-        <div id="avif-notice" class="notice-banner hidden" role="alert">
-            <span class="notice-icon" aria-hidden="true">⚠️</span>
-            <span data-i18n="notice.avifUnsupported">AVIF format is not supported in this browser.</span>
-        </div>
 
         <!-- Input Section -->
         <section class="input-section" aria-label="Image input area" data-i18n="input.section.aria" data-i18n-attr="aria-label">
@@ -114,9 +108,9 @@
                 <div class="drop-zone-content">
                     <span class="drop-zone-icon" aria-hidden="true">📁</span>
                     <p class="drop-zone-text" data-i18n="dropzone.text">Drop image here or click to select</p>
-                    <p class="drop-zone-hint" data-i18n="dropzone.hint">Supports: JPEG, PNG, WebP, GIF, AVIF (max 20MB)</p>
+                    <p class="drop-zone-hint" data-i18n="dropzone.hint">Supports: JPEG, PNG, WebP, GIF (max 20MB)</p>
                 </div>
-                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,.jpg,.jpeg,.png,.webp,.gif,.avif" class="file-input" aria-hidden="true">
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" class="file-input" aria-hidden="true">
             </div>
 
             <!-- Original Image Info -->
@@ -242,10 +236,6 @@
                             <input type="radio" name="output-format" value="image/webp">
                             <span class="format-name">WebP</span>
                         </label>
-                        <label id="format-avif-label" class="radio-label format-option">
-                            <input type="radio" name="output-format" value="image/avif">
-                            <span class="format-name">AVIF</span>
-                        </label>
                     </div>
 
                     <!-- Quality Slider -->
@@ -313,7 +303,7 @@
                 </div>
                 <div id="warning-format-unsupported" class="warning-item hidden">
                     <span class="warning-icon" aria-hidden="true">⚠️</span>
-                    <span id="warning-format-unsupported-text" data-i18n="warning.formatUnsupported">This browser cannot encode WebP/AVIF. Output may fall back to PNG.</span>
+                    <span id="warning-format-unsupported-text" data-i18n="warning.formatUnsupported">This browser cannot encode WebP. Output may fall back to PNG.</span>
                 </div>
                 <div id="warning-webp-ios" class="warning-item hidden">
                     <span class="warning-icon" aria-hidden="true">⚠️</span>

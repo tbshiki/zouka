@@ -48,8 +48,6 @@ const UI = (function () {
   function cacheElements() {
     elements = {
       // Notice
-      avifNotice: document.getElementById('avif-notice'),
-
       // Drop zone
       dropZone: document.getElementById('drop-zone'),
       fileInput: document.getElementById('file-input'),
@@ -76,7 +74,6 @@ const UI = (function () {
       btnLockRatio: document.getElementById('btn-lock-ratio'),
       presetButtons: document.querySelectorAll('.btn-preset'),
       formatRadios: document.querySelectorAll('input[name="output-format"]'),
-      formatAvifLabel: document.getElementById('format-avif-label'),
       qualityControl: document.getElementById('quality-control'),
       inputQuality: document.getElementById('input-quality'),
       qualityValue: document.getElementById('quality-value'),
@@ -1133,13 +1130,10 @@ const UI = (function () {
     }, 3000);
   }
 
-  // ========== AVIF対応チェック ==========
+  // ========== WebP対応チェック ==========
 
   async function checkBrowserSupport() {
-    await Promise.all([
-      ImageProcessor.checkAVIFSupport(),
-      ImageProcessor.checkWebPSupport()
-    ]);
+    await ImageProcessor.checkWebPSupport();
 
     updateEstimate();
   }

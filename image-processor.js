@@ -10,8 +10,8 @@ const ImageProcessor = (function () {
   const CONFIG = {
     MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB
     MAX_DIMENSION: 8000, // 8000px
-    SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/jpg'],
-    OUTPUT_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+    SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'],
+    OUTPUT_FORMATS: ['image/jpeg', 'image/png', 'image/webp']
   };
 
   // AVIF対応フラグ（null = 未判定）
