@@ -825,10 +825,12 @@ const UI = (function () {
   function isOutputFormatSupported(format) {
     const normalized = normalizeMimeType(format);
     if (normalized === 'image/avif') {
-      return ImageProcessor.isAVIFSupported();
+      const supported = ImageProcessor.isAVIFSupported();
+      return supported !== false;
     }
     if (normalized === 'image/webp') {
-      return ImageProcessor.isWebPSupported();
+      const supported = ImageProcessor.isWebPSupported();
+      return supported !== false;
     }
     return true;
   }

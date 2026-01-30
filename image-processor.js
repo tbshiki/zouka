@@ -14,10 +14,10 @@ const ImageProcessor = (function () {
     OUTPUT_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
   };
 
-  // AVIF対応フラグ
-  let avifSupported = false;
-  // WebP対応フラグ
-  let webpSupported = false;
+  // AVIF対応フラグ（null = 未判定）
+  let avifSupported = null;
+  // WebP対応フラグ（null = 未判定）
+  let webpSupported = null;
 
   /**
    * AVIF対応をチェック
