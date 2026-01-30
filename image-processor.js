@@ -28,10 +28,20 @@ const ImageProcessor = (function () {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      canvas.toBlob(blob => {
-        avifSupported = !!blob;
-        resolve(avifSupported);
-      }, 'image/avif', 0.5);
+      if (typeof canvas.toBlob !== 'function') {
+        avifSupported = false;
+        resolve(false);
+        return;
+      }
+      try {
+        canvas.toBlob(blob => {
+          avifSupported = !!blob;
+          resolve(avifSupported);
+        }, 'image/avif', 0.5);
+      } catch (error) {
+        avifSupported = false;
+        resolve(false);
+      }
     });
   }
 
@@ -44,10 +54,20 @@ const ImageProcessor = (function () {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      canvas.toBlob(blob => {
-        webpSupported = !!blob;
-        resolve(webpSupported);
-      }, 'image/webp', 0.5);
+      if (typeof canvas.toBlob !== 'function') {
+        webpSupported = false;
+        resolve(false);
+        return;
+      }
+      try {
+        canvas.toBlob(blob => {
+          webpSupported = !!blob;
+          resolve(webpSupported);
+        }, 'image/webp', 0.5);
+      } catch (error) {
+        webpSupported = false;
+        resolve(false);
+      }
     });
   }
 

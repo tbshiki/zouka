@@ -84,8 +84,9 @@ const I18n = (function () {
     currentLang = nextLang;
     localStorage.setItem('lang', nextLang);
 
-    loadTranslations(nextLang).then(() => {
+    return loadTranslations(nextLang).then(() => {
       applyTranslations();
+      return true;
     });
   }
 

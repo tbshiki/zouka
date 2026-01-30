@@ -963,9 +963,13 @@ const UI = (function () {
     if (typeof I18n !== 'undefined') {
       const currentLang = I18n.getCurrentLang();
       const newLang = currentLang === 'en' ? 'ja' : 'en';
-      I18n.setLang(newLang);
       updateLangIcon(newLang);
-      updateEstimate();
+      const langPromise = I18n.setLang(newLang);
+      if (langPromise && typeof langPromise.then === 'function') {
+        langPromise.then(() => updateEstimate());
+      } else {
+        updateEstimate();
+      }
     }
   }
 
@@ -1082,6 +1086,13 @@ const UI = (function () {
     if (!avifSupported) {
       elements.avifNotice.classList.remove('hidden');
       elements.formatAvifLabel.classList.add('hidden');
+      const avifInput = elements.formatAvifLabel?.querySelector('input[type="radio"]');
+      if (avifInput && avifInput.checked) {
+        const jpegInput = document.querySelector('input[name="output-format"][value="image/jpeg"]');
+        if (jpegInput) {
+          jpegInput.checked = true;
+        }
+      }
     }
 
     updateEstimate();
