@@ -35,7 +35,8 @@ const ImageProcessor = (function () {
       }
       try {
         canvas.toBlob(blob => {
-          avifSupported = !!blob;
+          const type = normalizeMimeType(blob?.type);
+          avifSupported = type === 'image/avif';
           resolve(avifSupported);
         }, 'image/avif', 0.5);
       } catch (error) {
@@ -61,7 +62,8 @@ const ImageProcessor = (function () {
       }
       try {
         canvas.toBlob(blob => {
-          webpSupported = !!blob;
+          const type = normalizeMimeType(blob?.type);
+          webpSupported = type === 'image/webp';
           resolve(webpSupported);
         }, 'image/webp', 0.5);
       } catch (error) {
@@ -561,7 +563,11 @@ const ImageProcessor = (function () {
         try {
           canvas.toBlob(blob => {
             if (blob) {
-              const actualType = normalizeMimeType(blob.type) || normalizeMimeType(mimeType) || mimeType;
+              const reportedType = normalizeMimeType(blob.type);
+              const actualType = reportedType ||
+                (fallbackFormat ? normalizeMimeType(fallbackFormat) : '') ||
+                normalizeMimeType(mimeType) ||
+                mimeType;
               const url = URL.createObjectURL(blob);
               resolve({
                 blob,

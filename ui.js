@@ -315,6 +315,17 @@ const UI = (function () {
     elements.infoSize.textContent = info.formattedSize;
     elements.infoFormat.textContent = info.mimeType;
     elements.originalInfo.classList.remove('hidden');
+
+    if (elements.originalInfo) {
+      elements.originalInfo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.requestAnimationFrame(() => {
+        try {
+          elements.originalInfo.focus({ preventScroll: true });
+        } catch (error) {
+          elements.originalInfo.focus();
+        }
+      });
+    }
   }
 
   function displayPreview(file) {
