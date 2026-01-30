@@ -20,6 +20,7 @@ const UI = (function () {
     selectedRatio: '1:1',
     lastChangedDimension: 'width',
     isProcessing: false,
+    formatFallback: null,
     lastFocusedElement: null
   };
 
@@ -131,6 +132,10 @@ const UI = (function () {
       warningAspectChange: document.getElementById('warning-aspect-change'),
       warningAspectText: document.querySelector('#warning-aspect-change [data-i18n]'),
       warningAnimatedGif: document.getElementById('warning-animated-gif'),
+      warningFormatUnsupported: document.getElementById('warning-format-unsupported'),
+      warningFormatUnsupportedText: document.getElementById('warning-format-unsupported-text'),
+      warningFormatFallback: document.getElementById('warning-format-fallback'),
+      warningFormatText: document.getElementById('warning-format-text'),
 
       // Toast
       toastContainer: document.getElementById('toast-container')
@@ -254,6 +259,9 @@ const UI = (function () {
     const validation = ImageProcessor.validateFile(file);
     if (!validation.valid) {
       showToast(tOr(validation.errorKey, 'Invalid file'), 'error');
+      if (elements.fileInput) {
+        elements.fileInput.value = '';
+      }
       return;
     }
 
@@ -274,6 +282,7 @@ const UI = (function () {
       state.originalImage = file;
       state.originalBitmap = bitmap;
       state.originalInfo = info;
+      clearFormatFallback();
 
       // UI更新
       displayOriginalInfo(info);
@@ -292,6 +301,10 @@ const UI = (function () {
     } catch (error) {
       console.error('Error loading image:', error);
       showToast(tOr('toast.fileError', 'Failed to load image'), 'error');
+    } finally {
+      if (elements.fileInput) {
+        elements.fileInput.value = '';
+      }
     }
   }
 
@@ -382,6 +395,8 @@ const UI = (function () {
   function handleFormatChange(e) {
     const format = e.target.value;
 
+    clearFormatFallback();
+
     // PNG選択時は品質コントロールを非表示
     elements.qualityControl.classList.toggle('hidden', format === 'image/png');
 
@@ -471,7 +486,8 @@ const UI = (function () {
       options
     );
 
-    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality, state.originalInfo);
+    const estimateFormat = isOutputFormatSupported(format) ? format : 'image/png';
+    const estimate = ImageProcessor.estimateOutputSize(width, height, estimateFormat, quality, state.originalInfo);
 
     elements.estimateDimensions.textContent = estimate.dimensions;
     elements.estimatePixels.textContent = estimate.totalPixels;
@@ -602,6 +618,47 @@ const UI = (function () {
     elements.warningAnimatedGif.classList.toggle('hidden', !showAnimatedGifWarning);
     if (showAnimatedGifWarning) hasAnyWarning = true;
 
+    // フォーマットフォールバック警告
+    let showFormatFallbackWarning = false;
+    if (state.formatFallback && state.formatFallback.requested && state.formatFallback.actual) {
+      const requestedLabel = getFormatLabel(state.formatFallback.requested);
+      const actualLabel = getFormatLabel(state.formatFallback.actual);
+      const fallbackMessage = tOr(
+        'warning.formatFallback',
+        `Selected format is not supported. Output will be ${actualLabel} instead of ${requestedLabel}.`,
+        { requested: requestedLabel, actual: actualLabel }
+      );
+      if (elements.warningFormatText) {
+        elements.warningFormatText.textContent = fallbackMessage;
+      }
+      showFormatFallbackWarning = true;
+    }
+    elements.warningFormatFallback?.classList.toggle('hidden', !showFormatFallbackWarning);
+    if (showFormatFallbackWarning) hasAnyWarning = true;
+
+    // フォーマット未対応警告（事前）
+    let showFormatUnsupportedWarning = false;
+    const selectedFormat = getOutputFormat();
+    if (
+      state.originalInfo &&
+      !showFormatFallbackWarning &&
+      selectedFormat &&
+      !isOutputFormatSupported(selectedFormat)
+    ) {
+      const formatLabel = getFormatLabel(selectedFormat);
+      const warningMessage = tOr(
+        'warning.formatUnsupported',
+        `This browser cannot encode ${formatLabel}. Output may fall back to PNG.`,
+        { format: formatLabel }
+      );
+      if (elements.warningFormatUnsupportedText) {
+        elements.warningFormatUnsupportedText.textContent = warningMessage;
+      }
+      showFormatUnsupportedWarning = true;
+    }
+    elements.warningFormatUnsupported?.classList.toggle('hidden', !showFormatUnsupportedWarning);
+    if (showFormatUnsupportedWarning) hasAnyWarning = true;
+
     // 警告エリア全体の表示/非表示
     elements.warningArea.classList.toggle('hidden', !hasAnyWarning);
   }
@@ -643,6 +700,8 @@ const UI = (function () {
 
       // 変換実行
       const result = await ImageProcessor.convertImage(state.originalBitmap, options);
+      const actualFormat = normalizeMimeType(result.mimeType) || normalizeMimeType(format);
+      const fallbackInfo = detectFormatFallback(format, actualFormat);
 
       // 古いURLを解放
       if (state.convertedUrl) {
@@ -650,8 +709,23 @@ const UI = (function () {
       }
       state.convertedUrl = result.url;
 
+      state.formatFallback = fallbackInfo;
+
       // 結果表示
       displayResult(result, format);
+
+      if (fallbackInfo) {
+        const requestedLabel = getFormatLabel(fallbackInfo.requested);
+        const actualLabel = getFormatLabel(fallbackInfo.actual);
+        showToast(
+          tOr(
+            'toast.formatFallback',
+            `Format fallback: ${requestedLabel} → ${actualLabel}`,
+            { requested: requestedLabel, actual: actualLabel }
+          ),
+          'warning'
+        );
+      }
 
       // トースト通知
       if (result.size > state.originalInfo.fileSize) {
@@ -661,6 +735,9 @@ const UI = (function () {
       } else {
         showToast(tOr('toast.convertSuccess', 'Conversion complete!'), 'success');
       }
+
+      // 警告の再評価（フォーマットフォールバック含む）
+      updateEstimate();
 
     } catch (error) {
       console.error('Conversion error:', error);
@@ -672,6 +749,8 @@ const UI = (function () {
   }
 
   function displayResult(result, format) {
+    const actualFormat = normalizeMimeType(result?.mimeType) || normalizeMimeType(format);
+
     // 元画像
     elements.resultOriginalImg.src = elements.previewImage.src;
     elements.resultOriginalSize.textContent = `${state.originalInfo.width}×${state.originalInfo.height} / ${state.originalInfo.formattedSize}`;
@@ -681,7 +760,7 @@ const UI = (function () {
     // 変換後画像
     elements.resultConvertedImg.src = result.url;
     elements.resultConvertedSize.textContent = `${result.width}×${result.height} / ${result.formattedSize}`;
-    const convertedExt = getExtensionFromMime(format);
+    const convertedExt = getExtensionFromMime(actualFormat);
     elements.resultConvertedExt.textContent = convertedExt ? `.${convertedExt}` : '-';
 
     // サイズ削減率
@@ -706,7 +785,7 @@ const UI = (function () {
       state.originalInfo.filename,
       result.width,
       result.height,
-      format
+      actualFormat
     );
     elements.btnDownload.href = result.url;
     elements.btnDownload.download = filename;
@@ -734,12 +813,58 @@ const UI = (function () {
     if (!mimeType) return null;
     const map = {
       'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
       'image/png': 'png',
       'image/webp': 'webp',
       'image/gif': 'gif',
       'image/avif': 'avif'
     };
     return map[mimeType] || (mimeType.includes('/') ? mimeType.split('/')[1] : null);
+  }
+
+  function isOutputFormatSupported(format) {
+    const normalized = normalizeMimeType(format);
+    if (normalized === 'image/avif') {
+      const supported = ImageProcessor.isAVIFSupported();
+      return supported !== false;
+    }
+    if (normalized === 'image/webp') {
+      const supported = ImageProcessor.isWebPSupported();
+      return supported !== false;
+    }
+    return true;
+  }
+
+  function normalizeMimeType(type) {
+    if (typeof type !== 'string') return '';
+    const normalized = type.toLowerCase().trim();
+    return normalized === 'image/jpg' ? 'image/jpeg' : normalized;
+  }
+
+  function getFormatLabel(mimeType) {
+    const normalized = normalizeMimeType(mimeType);
+    const map = {
+      'image/jpeg': 'JPEG',
+      'image/png': 'PNG',
+      'image/webp': 'WebP',
+      'image/avif': 'AVIF',
+      'image/gif': 'GIF'
+    };
+    if (map[normalized]) return map[normalized];
+    if (!normalized) return 'Unknown';
+    const suffix = normalized.includes('/') ? normalized.split('/')[1] : normalized;
+    return suffix.toUpperCase();
+  }
+
+  function detectFormatFallback(requestedFormat, actualFormat) {
+    const requested = normalizeMimeType(requestedFormat);
+    const actual = normalizeMimeType(actualFormat);
+    if (!requested || !actual || requested === actual) return null;
+    return { requested, actual };
+  }
+
+  function clearFormatFallback() {
+    state.formatFallback = null;
   }
 
   // ========== 処理中オーバーレイ ==========
@@ -770,6 +895,7 @@ const UI = (function () {
     state.originalBitmap = null;
     state.originalInfo = null;
     state.previewUrl = null;
+    clearFormatFallback();
     hideResult();
 
     // UI リセット
@@ -782,6 +908,8 @@ const UI = (function () {
     elements.warningArea.classList.add('hidden');
     elements.warningSizeIncrease.classList.add('hidden');
     elements.warningAspectChange.classList.add('hidden');
+    elements.warningFormatUnsupported?.classList.add('hidden');
+    elements.warningFormatFallback?.classList.add('hidden');
     resetEstimateDelta();
 
     // 設定をデフォルトに
@@ -850,8 +978,13 @@ const UI = (function () {
     if (typeof I18n !== 'undefined') {
       const currentLang = I18n.getCurrentLang();
       const newLang = currentLang === 'en' ? 'ja' : 'en';
-      I18n.setLang(newLang);
       updateLangIcon(newLang);
+      const langPromise = I18n.setLang(newLang);
+      if (langPromise && typeof langPromise.then === 'function') {
+        langPromise.then(() => updateEstimate());
+      } else {
+        updateEstimate();
+      }
     }
   }
 
@@ -960,12 +1093,12 @@ const UI = (function () {
   // ========== AVIF対応チェック ==========
 
   async function checkBrowserSupport() {
-    const avifSupported = await ImageProcessor.checkAVIFSupport();
+    await Promise.all([
+      ImageProcessor.checkAVIFSupport(),
+      ImageProcessor.checkWebPSupport()
+    ]);
 
-    if (!avifSupported) {
-      elements.avifNotice.classList.remove('hidden');
-      elements.formatAvifLabel.classList.add('hidden');
-    }
+    updateEstimate();
   }
 
   // ========== 初期化 ==========

@@ -14,8 +14,10 @@ const ImageProcessor = (function () {
     OUTPUT_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
   };
 
-  // AVIF対応フラグ
-  let avifSupported = false;
+  // AVIF対応フラグ（null = 未判定）
+  let avifSupported = null;
+  // WebP対応フラグ（null = 未判定）
+  let webpSupported = null;
 
   /**
    * AVIF対応をチェック
@@ -26,10 +28,46 @@ const ImageProcessor = (function () {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      canvas.toBlob(blob => {
-        avifSupported = !!blob;
-        resolve(avifSupported);
-      }, 'image/avif', 0.5);
+      if (typeof canvas.toBlob !== 'function') {
+        avifSupported = false;
+        resolve(false);
+        return;
+      }
+      try {
+        canvas.toBlob(blob => {
+          avifSupported = !!blob;
+          resolve(avifSupported);
+        }, 'image/avif', 0.5);
+      } catch (error) {
+        avifSupported = false;
+        resolve(false);
+      }
+    });
+  }
+
+  /**
+   * WebP対応をチェック
+   * @returns {Promise<boolean>}
+   */
+  async function checkWebPSupport() {
+    return new Promise(resolve => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      if (typeof canvas.toBlob !== 'function') {
+        webpSupported = false;
+        resolve(false);
+        return;
+      }
+      try {
+        canvas.toBlob(blob => {
+          webpSupported = !!blob;
+          resolve(webpSupported);
+        }, 'image/webp', 0.5);
+      } catch (error) {
+        webpSupported = false;
+        resolve(false);
+      }
     });
   }
 
@@ -39,6 +77,14 @@ const ImageProcessor = (function () {
    */
   function isAVIFSupported() {
     return avifSupported;
+  }
+
+  /**
+   * WebP対応状態を取得
+   * @returns {boolean}
+   */
+  function isWebPSupported() {
+    return webpSupported;
   }
 
   /**
@@ -72,7 +118,9 @@ const ImageProcessor = (function () {
    * @returns {string}
    */
   function normalizeMimeType(type) {
-    return typeof type === 'string' ? type.toLowerCase().trim() : '';
+    if (typeof type !== 'string') return '';
+    const normalized = type.toLowerCase().trim();
+    return normalized === 'image/jpg' ? 'image/jpeg' : normalized;
   }
 
   /**
@@ -482,13 +530,16 @@ const ImageProcessor = (function () {
    */
   async function generateOptimizedBlob(canvas, options, width, height) {
     const targetFormat = options.format;
+    const fallbackFormat = (targetFormat === 'image/avif' || targetFormat === 'image/webp')
+      ? 'image/png'
+      : null;
 
     // PNG は品質指定不可（可逆圧縮）
     if (targetFormat === 'image/png') {
       return generateBlob(canvas, targetFormat, undefined, width, height);
     }
 
-    return generateBlob(canvas, targetFormat, options.quality, width, height);
+    return generateBlob(canvas, targetFormat, options.quality, width, height, fallbackFormat);
   }
 
   /**
@@ -500,24 +551,46 @@ const ImageProcessor = (function () {
    * @param {number} height
    * @returns {Promise<Object>}
    */
-  function generateBlob(canvas, format, quality, width, height) {
+  function generateBlob(canvas, format, quality, width, height, fallbackFormat = null) {
     return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (!blob) {
+      const attempt = (mimeType, mimeQuality, isFallback) => {
+        if (!canvas || typeof canvas.toBlob !== 'function') {
           reject(new Error('Failed to convert image'));
           return;
         }
+        try {
+          canvas.toBlob(blob => {
+            if (blob) {
+              const actualType = normalizeMimeType(blob.type) || normalizeMimeType(mimeType) || mimeType;
+              const url = URL.createObjectURL(blob);
+              resolve({
+                blob,
+                url,
+                size: blob.size,
+                formattedSize: formatFileSize(blob.size),
+                width,
+                height,
+                mimeType: actualType
+              });
+              return;
+            }
 
-        const url = URL.createObjectURL(blob);
-        resolve({
-          blob,
-          url,
-          size: blob.size,
-          formattedSize: formatFileSize(blob.size),
-          width,
-          height
-        });
-      }, format, quality);
+            if (!isFallback && fallbackFormat) {
+              attempt(fallbackFormat, undefined, true);
+              return;
+            }
+            reject(new Error('Failed to convert image'));
+          }, mimeType, mimeQuality);
+        } catch (error) {
+          if (!isFallback && fallbackFormat) {
+            attempt(fallbackFormat, undefined, true);
+            return;
+          }
+          reject(error);
+        }
+      };
+
+      attempt(format, quality, false);
     });
   }
 
@@ -549,7 +622,9 @@ const ImageProcessor = (function () {
   return {
     CONFIG,
     checkAVIFSupport,
+    checkWebPSupport,
     isAVIFSupported,
+    isWebPSupported,
     formatFileSize,
     calculateAspectRatio,
     validateFile,
