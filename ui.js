@@ -259,6 +259,9 @@ const UI = (function () {
     const validation = ImageProcessor.validateFile(file);
     if (!validation.valid) {
       showToast(tOr(validation.errorKey, 'Invalid file'), 'error');
+      if (elements.fileInput) {
+        elements.fileInput.value = '';
+      }
       return;
     }
 
@@ -298,6 +301,10 @@ const UI = (function () {
     } catch (error) {
       console.error('Error loading image:', error);
       showToast(tOr('toast.fileError', 'Failed to load image'), 'error');
+    } finally {
+      if (elements.fileInput) {
+        elements.fileInput.value = '';
+      }
     }
   }
 
@@ -479,7 +486,8 @@ const UI = (function () {
       options
     );
 
-    const estimate = ImageProcessor.estimateOutputSize(width, height, format, quality, state.originalInfo);
+    const estimateFormat = isOutputFormatSupported(format) ? format : 'image/png';
+    const estimate = ImageProcessor.estimateOutputSize(width, height, estimateFormat, quality, state.originalInfo);
 
     elements.estimateDimensions.textContent = estimate.dimensions;
     elements.estimatePixels.textContent = estimate.totalPixels;
@@ -631,7 +639,12 @@ const UI = (function () {
     // フォーマット未対応警告（事前）
     let showFormatUnsupportedWarning = false;
     const selectedFormat = getOutputFormat();
-    if (!showFormatFallbackWarning && selectedFormat && !isOutputFormatSupported(selectedFormat)) {
+    if (
+      state.originalInfo &&
+      !showFormatFallbackWarning &&
+      selectedFormat &&
+      !isOutputFormatSupported(selectedFormat)
+    ) {
       const formatLabel = getFormatLabel(selectedFormat);
       const warningMessage = tOr(
         'warning.formatUnsupported',
@@ -1078,22 +1091,10 @@ const UI = (function () {
   // ========== AVIF対応チェック ==========
 
   async function checkBrowserSupport() {
-    const [avifSupported] = await Promise.all([
+    await Promise.all([
       ImageProcessor.checkAVIFSupport(),
       ImageProcessor.checkWebPSupport()
     ]);
-
-    if (!avifSupported) {
-      elements.avifNotice.classList.remove('hidden');
-      elements.formatAvifLabel.classList.add('hidden');
-      const avifInput = elements.formatAvifLabel?.querySelector('input[type="radio"]');
-      if (avifInput && avifInput.checked) {
-        const jpegInput = document.querySelector('input[name="output-format"][value="image/jpeg"]');
-        if (jpegInput) {
-          jpegInput.checked = true;
-        }
-      }
-    }
 
     updateEstimate();
   }

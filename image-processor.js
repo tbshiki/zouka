@@ -530,13 +530,16 @@ const ImageProcessor = (function () {
    */
   async function generateOptimizedBlob(canvas, options, width, height) {
     const targetFormat = options.format;
+    const fallbackFormat = (targetFormat === 'image/avif' || targetFormat === 'image/webp')
+      ? 'image/png'
+      : null;
 
     // PNG は品質指定不可（可逆圧縮）
     if (targetFormat === 'image/png') {
       return generateBlob(canvas, targetFormat, undefined, width, height);
     }
 
-    return generateBlob(canvas, targetFormat, options.quality, width, height);
+    return generateBlob(canvas, targetFormat, options.quality, width, height, fallbackFormat);
   }
 
   /**
@@ -548,26 +551,46 @@ const ImageProcessor = (function () {
    * @param {number} height
    * @returns {Promise<Object>}
    */
-  function generateBlob(canvas, format, quality, width, height) {
+  function generateBlob(canvas, format, quality, width, height, fallbackFormat = null) {
     return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (!blob) {
+      const attempt = (mimeType, mimeQuality, isFallback) => {
+        if (!canvas || typeof canvas.toBlob !== 'function') {
           reject(new Error('Failed to convert image'));
           return;
         }
+        try {
+          canvas.toBlob(blob => {
+            if (blob) {
+              const actualType = normalizeMimeType(blob.type) || normalizeMimeType(mimeType) || mimeType;
+              const url = URL.createObjectURL(blob);
+              resolve({
+                blob,
+                url,
+                size: blob.size,
+                formattedSize: formatFileSize(blob.size),
+                width,
+                height,
+                mimeType: actualType
+              });
+              return;
+            }
 
-        const actualType = normalizeMimeType(blob.type) || normalizeMimeType(format) || format;
-        const url = URL.createObjectURL(blob);
-        resolve({
-          blob,
-          url,
-          size: blob.size,
-          formattedSize: formatFileSize(blob.size),
-          width,
-          height,
-          mimeType: actualType
-        });
-      }, format, quality);
+            if (!isFallback && fallbackFormat) {
+              attempt(fallbackFormat, undefined, true);
+              return;
+            }
+            reject(new Error('Failed to convert image'));
+          }, mimeType, mimeQuality);
+        } catch (error) {
+          if (!isFallback && fallbackFormat) {
+            attempt(fallbackFormat, undefined, true);
+            return;
+          }
+          reject(error);
+        }
+      };
+
+      attempt(format, quality, false);
     });
   }
 
