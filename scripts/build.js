@@ -7,17 +7,13 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const crypto = require('crypto');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const CSP_NONCE_MODE = process.env.CSP_NONCE_MODE || 'dynamic';
 
 const FILES_TO_COPY = [
-  'style.css',
-  'main.js',
-  'ui.js',
-  'image-processor.js',
-  'i18n.js',
   'manifest.json',
   'logo.png',
   '_headers',
@@ -25,9 +21,15 @@ const FILES_TO_COPY = [
   'sitemap.xml'
 ];
 
-const DIRS_TO_COPY = [
-  'locales'
+const HASHED_ASSETS = [
+  'style.css',
+  'main.js',
+  'ui.js',
+  'image-processor.js',
+  'i18n.js'
 ];
+
+const LOCALES_DIR = 'locales';
 
 function ensureCleanDir(dirPath) {
   fs.rmSync(dirPath, { recursive: true, force: true });
@@ -51,6 +53,52 @@ function copyDir(srcDir, destDir) {
       copyFile(srcPath, destPath);
     }
   }
+}
+
+function hashContent(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 8);
+}
+
+function toPosixPath(filePath) {
+  return filePath.split(path.sep).join('/');
+}
+
+function copyHashedFile(srcRelPath) {
+  const srcPath = path.join(ROOT_DIR, srcRelPath);
+  const data = fs.readFileSync(srcPath);
+  const hash = hashContent(data);
+  const parsed = path.parse(srcRelPath);
+  const hashedName = `${parsed.name}.${hash}${parsed.ext}`;
+  const destRelPath = toPosixPath(path.join(parsed.dir || '', hashedName));
+  const destPath = path.join(DIST_DIR, destRelPath);
+  copyFile(srcPath, destPath);
+  return { original: toPosixPath(srcRelPath), hashed: destRelPath };
+}
+
+function buildAssetManifest() {
+  const assetManifest = {
+    assets: {},
+    locales: {}
+  };
+
+  for (const asset of HASHED_ASSETS) {
+    const mapping = copyHashedFile(asset);
+    assetManifest.assets[mapping.original] = mapping.hashed;
+  }
+
+  const localesPath = path.join(ROOT_DIR, LOCALES_DIR);
+  if (fs.existsSync(localesPath)) {
+    const localeFiles = fs.readdirSync(localesPath).filter(file => file.endsWith('.json'));
+    for (const file of localeFiles) {
+      const relPath = path.join(LOCALES_DIR, file);
+      const mapping = copyHashedFile(relPath);
+      assetManifest.assets[mapping.original] = mapping.hashed;
+      const lang = path.basename(file, '.json');
+      assetManifest.locales[lang] = mapping.hashed;
+    }
+  }
+
+  return assetManifest;
 }
 
 function buildAnalyticsSnippet(gaId, clarityId) {
@@ -89,19 +137,46 @@ function buildAnalyticsSnippet(gaId, clarityId) {
   return `\n    <!-- Analytics injected at build time -->\n    ${snippets.join('\n    ')}\n`;
 }
 
-function buildIndexHtml() {
+function buildAssetManifestSnippet(assetManifest) {
+  if (!assetManifest) {
+    return '';
+  }
+  const safeJson = JSON.stringify(assetManifest).replace(/</g, '\\u003c');
+  return `\n    <script nonce="__CSP_NONCE__">window.__ASSET_MANIFEST__=${safeJson};</script>\n`;
+}
+
+function applyAssetMappings(html, assetManifest) {
+  if (!assetManifest || !assetManifest.assets) {
+    return html;
+  }
+  let result = html;
+  Object.entries(assetManifest.assets).forEach(([original, hashed]) => {
+    if (original && hashed) {
+      result = result.split(original).join(hashed);
+    }
+  });
+  return result;
+}
+
+function buildIndexHtml(assetManifest) {
   const srcPath = path.join(ROOT_DIR, 'index.html');
   const destPath = path.join(DIST_DIR, 'index.html');
   const gaId = (process.env.GA_ID || process.env.GA_MEASUREMENT_ID || '').trim();
   const clarityId = (process.env.CLARITY_ID || '').trim();
   let html = fs.readFileSync(srcPath, 'utf-8');
 
+  html = applyAssetMappings(html, assetManifest);
+
+  const assetManifestSnippet = buildAssetManifestSnippet(assetManifest);
   const analyticsSnippet = buildAnalyticsSnippet(gaId, clarityId);
-  if (analyticsSnippet) {
+  const combinedSnippets = `${assetManifestSnippet}${analyticsSnippet}`;
+  if (combinedSnippets) {
     if (!html.includes('</head>')) {
-      throw new Error('index.html is missing </head> for analytics injection.');
+      throw new Error('index.html is missing </head> for injection.');
     }
-    html = html.replace('</head>', `${analyticsSnippet}</head>`);
+    html = html.replace('</head>', `${combinedSnippets}</head>`);
+  }
+  if (analyticsSnippet) {
     console.log('📈 Analytics injected (GA/Clarity).');
   } else {
     console.log('📈 Analytics not configured (GA_ID/CLARITY_ID not set).');
@@ -146,18 +221,13 @@ function main() {
   console.log('📦 Build started');
   ensureCleanDir(DIST_DIR);
 
-  buildIndexHtml();
+  const assetManifest = buildAssetManifest();
+  buildIndexHtml(assetManifest);
 
   for (const file of FILES_TO_COPY) {
     const src = path.join(ROOT_DIR, file);
     const dest = path.join(DIST_DIR, file);
     copyFile(src, dest);
-  }
-
-  for (const dir of DIRS_TO_COPY) {
-    const src = path.join(ROOT_DIR, dir);
-    const dest = path.join(DIST_DIR, dir);
-    copyDir(src, dest);
   }
 
   if (CSP_NONCE_MODE === 'static') {
