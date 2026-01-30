@@ -192,7 +192,7 @@ const I18n = (function () {
     const fallbackFeatures = [
       'Image resize',
       'Format conversion',
-      'AVIF/WebP/PNG/JPEG support',
+      'WebP/PNG/JPEG support',
       'Fully local processing',
       'Privacy protection'
     ];

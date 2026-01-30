@@ -11,13 +11,13 @@
   "header.theme.aria": "ダークモードとライトモードを切り替え",
   "intro.description": "ブラウザ上で画像をリサイズ・形式変換。下の設定を選んでから、画像をドロップまたは選択してください。",
   "intro.feature1": "🔒 100%ローカル処理 - 画像はデバイスから出ません",
-  "intro.feature2": "🖼️ JPEG, PNG, WebP, GIF, AVIFに対応",
+  "intro.feature2": "🖼️ JPEG, PNG, WebP, GIFに対応",
   "intro.feature3": "📐 カスタムサイズ、長辺指定、プリセット比率でリサイズ",
   "notice.avifUnsupported": "このブラウザではAVIF形式に対応していません。",
   "input.section.aria": "画像入力エリア",
   "dropzone.aria": "クリックまたはドロップで画像を選択",
   "dropzone.text": "ここに画像をドロップ、またはクリックして選択",
-  "dropzone.hint": "対応形式: JPEG, PNG, WebP, GIF, AVIF（最大20MB）",
+  "dropzone.hint": "対応形式: JPEG, PNG, WebP, GIF（最大20MB）",
   "info.original.title": "元画像",
   "info.filename": "ファイル名",
   "info.dimensions": "サイズ",
@@ -122,7 +122,7 @@
   "structured.featureList": [
     "画像リサイズ",
     "形式変換",
-    "AVIF/WebP/PNG/JPEG対応",
+    "WebP/PNG/JPEG対応",
     "完全ローカル処理",
     "プライバシー保護"
   ]
